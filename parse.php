@@ -1,48 +1,33 @@
 <?php
 
+/*
+ * This file is part of Chevere.
+ *
+ * (c) Rodolfo Berrios <rodolfo@chevere.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 declare(strict_types=1);
 
 use Chevere\Components\Writer\StreamWriterFromString;
-use Go\ParserReflection\ReflectionClass;
+use Chevere\ReferenceMd\Reference;
+use Chevere\ReferenceMd\ReflectionFileInterface;
 use Go\ParserReflection\ReflectionClassConstant;
-use Go\ParserReflection\ReflectionFile;
-use Go\ParserReflection\ReflectionFileNamespace;
 use Go\ParserReflection\ReflectionMethod;
 use Go\ParserReflection\ReflectionParameter;
 use phpDocumentor\Reflection\DocBlockFactory;
 
 require 'vendor/autoload.php';
 
-function getShortName(string $fqn): string
-{
-    $explode = explode('\\', $fqn);
-
-    return $explode[array_key_last($explode)];
-}
-
 $remote = 'https://github.com/chevere/chevere/blob/master/';
-$target = 'interfaces/ThrowableHandler/ThrowableHandlerInterface.php';
+$target = 'interfaces/Str/StrInterface.php';
 $urlMap = $remote . $target;
 $writer = new StreamWriterFromString(__DIR__ . '/md.md', 'w');
-$reflection = new ReflectionFile('vendor/chevere/chevere/' . $target);
-/**
- * @var ReflectionFileNamespace[]
- */
-$namespaces = $reflection->getFileNamespaces();
-/**
- * @var string $ns
- */
-$ns = array_key_first($namespaces);
-$fileNs = $namespaces[$ns];
-/**
- * @var ReflectionClass[]
- */
-$interfaces = $fileNs->getClasses();
-$key = array_key_first($interfaces);
-$interface = $interfaces[$key];
+$reflection = new ReflectionFileInterface('vendor/chevere/chevere/' . $target);
+$interface = $reflection->interface();
 $factory = DocBlockFactory::createInstance();
-// Title + FQN
 $writer->write(
     '`' . $interface->getNamespaceName() . '`' . PHP_EOL . PHP_EOL .
     '# ' . $interface->getShortName() . PHP_EOL . PHP_EOL .
@@ -52,18 +37,15 @@ $extends = $interface->getInterfaceNames();
 if ($extends !== []) {
     $writer->write('## Extends' . PHP_EOL . PHP_EOL);
     foreach ($extends as $extendFqn) {
-        $writer->write('- [' . getShortName($extendFqn) . ']()' . PHP_EOL);
+        $writer->write('- [' . (new Reference($extendFqn))->getShortName() . ']()' . PHP_EOL);
     }
     $writer->write(PHP_EOL);
 }
-$docComment = $interface->getDocComment();
-if ($docComment !== false) {
-    $docBlock = $factory->create($docComment);
-    // Description
+if ($reflection->hasDocBlock()) {
     $writer->write(
         '## Description' . PHP_EOL . PHP_EOL .
-        $docBlock->getSummary() . PHP_EOL . PHP_EOL .
-        (string) $docBlock->getDescription() . PHP_EOL . PHP_EOL
+        $reflection->docBlock()->getSummary() . PHP_EOL . PHP_EOL .
+        (string) $reflection->docBlock()->getDescription() . PHP_EOL . PHP_EOL
     );
 }
 /**
@@ -71,7 +53,6 @@ if ($docComment !== false) {
  */
 $constants = $interface->getConstants();
 if ($constants !== []) {
-    // Constants
     $writer->write(
         '## Constants' . PHP_EOL . PHP_EOL
     );
@@ -86,52 +67,56 @@ if ($constants !== []) {
     }
     $writer->write(PHP_EOL);
 }
-// Methods
-$writer->write(
-    '## Methods' . PHP_EOL .
-    PHP_EOL . '---' . PHP_EOL .
-    PHP_EOL
-);
 /**
  * @var ReflectionMethod[]
  */
 $methods = $interface->getMethods();
-foreach ($methods as $method) {
-    $writer->write('### ' . $method->getName() . '()' . PHP_EOL . PHP_EOL);
-    $docComment = $method->getDocComment();
-    if ($docComment !== false) {
-        $docBlock = $factory->create((string) $docComment);
-        $summary = $docBlock->getSummary();
-        if ($summary !== '') {
-            $writer->write(
-                '> ' . $summary . PHP_EOL . PHP_EOL
-            );
-        }
-        $description = (string) $docBlock->getDescription();
-        if ($description !== '') {
-            $writer->write($description . PHP_EOL . PHP_EOL);
-        }
-    }
-    /**
-     * @var ReflectionParameter[] $parameters
-     */
-    $parameters = $method->getParameters();
-    if (count($parameters) > 0) {
-        $writer->write('#### Parameters' . PHP_EOL . PHP_EOL);
-        foreach ($parameters as $pos => $parameter) {
-            $writer->write('[' . getShortName((string) $parameter->getType()) . ']() `$' . $parameter->getName() . '`' . PHP_EOL . PHP_EOL);
-        }
-    }
-    $writer->write('#### Return' . PHP_EOL . PHP_EOL);
-    $return = getShortName((string) $method->getReturnType());
-    if ($return === '') {
-        $return = 'void';
-    } else {
-        $return = "[$return]()";
-    }
+if ($methods !== []) {
     $writer->write(
-        $return . PHP_EOL .
+        '## Methods' . PHP_EOL .
         PHP_EOL . '---' . PHP_EOL .
         PHP_EOL
     );
+    foreach ($methods as $method) {
+        $writer->write('### ' . $method->getName() . '()' . PHP_EOL . PHP_EOL);
+        $docComment = $method->getDocComment();
+        if ($docComment !== false) {
+            $docBlock = $factory->create((string) $docComment);
+            $summary = $docBlock->getSummary();
+            if ($summary !== '') {
+                $writer->write(
+                    '> ' . $summary . PHP_EOL . PHP_EOL
+                );
+            }
+            $description = (string) $docBlock->getDescription();
+            if ($description !== '') {
+                $writer->write($description . PHP_EOL . PHP_EOL);
+            }
+        }
+        /**
+         * @var ReflectionParameter[] $parameters
+         */
+        $parameters = $method->getParameters();
+        if (count($parameters) > 0) {
+            $writer->write('#### Parameters' . PHP_EOL . PHP_EOL);
+            foreach ($parameters as $pos => $parameter) {
+                $type = $parameter->getType();
+                $writer->write('- ' . (new Reference((string) $type))->getHighligh() . ' `$' . $parameter->getName() . '`' . PHP_EOL);
+            }
+            $writer->write(PHP_EOL);
+        }
+        if ($method->getName() !== '__construct') {
+            $writer->write('#### Return' . PHP_EOL . PHP_EOL);
+            $return = (string) $method->getReturnType();
+            if ($return === '') {
+                $return = 'void';
+            } else {
+                $return = (new Reference($return))->getHighligh();
+            }
+            $writer->write($return . PHP_EOL . PHP_EOL);
+        }
+        $writer->write(
+            '---' . PHP_EOL . PHP_EOL
+        );
+    }
 }
