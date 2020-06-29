@@ -1,21 +1,23 @@
 <?php
 
+
 declare(strict_types=1);
 
 use Chevere\Components\Writer\StreamWriterFromString;
-use Go\ParserReflection\ReflectionFile;
-use Go\ParserReflection\ReflectionFileNamespace;
 use Go\ParserReflection\ReflectionClass;
 use Go\ParserReflection\ReflectionClassConstant;
+use Go\ParserReflection\ReflectionFile;
+use Go\ParserReflection\ReflectionFileNamespace;
 use Go\ParserReflection\ReflectionMethod;
-use phpDocumentor\Reflection\DocBlockFactory;
 use Go\ParserReflection\ReflectionParameter;
+use phpDocumentor\Reflection\DocBlockFactory;
 
 require 'vendor/autoload.php';
 
 function getShortName(string $fqn): string
 {
     $explode = explode('\\', $fqn);
+
     return $explode[array_key_last($explode)];
 }
 
@@ -39,7 +41,7 @@ $fileNs = $namespaces[$ns];
 $interfaces = $fileNs->getClasses();
 $key = array_key_first($interfaces);
 $interface = $interfaces[$key];
-$factory  = DocBlockFactory::createInstance();
+$factory = DocBlockFactory::createInstance();
 // Title + FQN
 $writer->write(
     '`' . $interface->getNamespaceName() . '`' . PHP_EOL . PHP_EOL .
@@ -50,7 +52,7 @@ $extends = $interface->getInterfaceNames();
 if ($extends !== []) {
     $writer->write('## Extends' . PHP_EOL . PHP_EOL);
     foreach ($extends as $extendFqn) {
-        $writer->write('- [' . getShortName($extendFqn) . ']()' .  PHP_EOL);
+        $writer->write('- [' . getShortName($extendFqn) . ']()' . PHP_EOL);
     }
     $writer->write(PHP_EOL);
 }
@@ -71,12 +73,12 @@ $constants = $interface->getConstants();
 if ($constants !== []) {
     // Constants
     $writer->write(
-        '## Constants'. PHP_EOL . PHP_EOL
+        '## Constants' . PHP_EOL . PHP_EOL
     );
     foreach ($constants as $const => $value) {
         $writer->write(
             '### ' . $const . PHP_EOL . PHP_EOL .
-            'Type `' . gettype($value) . '`'. PHP_EOL . PHP_EOL .
+            'Type `' . gettype($value) . '`' . PHP_EOL . PHP_EOL .
             '```php' . PHP_EOL .
             var_export($value, true) . PHP_EOL .
             '```' . PHP_EOL . PHP_EOL
@@ -117,7 +119,7 @@ foreach ($methods as $method) {
     if (count($parameters) > 0) {
         $writer->write('#### Parameters' . PHP_EOL . PHP_EOL);
         foreach ($parameters as $pos => $parameter) {
-            $writer->write('['.getShortName((string) $parameter->getType()).']() `$' . $parameter->getName() . '`' . PHP_EOL . PHP_EOL);
+            $writer->write('[' . getShortName((string) $parameter->getType()) . ']() `$' . $parameter->getName() . '`' . PHP_EOL . PHP_EOL);
         }
     }
     $writer->write('#### Return' . PHP_EOL . PHP_EOL);
