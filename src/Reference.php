@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Chevere\ReferenceMd;
 
-use Chevere\Components\Str\Str;
 use Chevere\Components\Str\StrBool;
 
 final class Reference
