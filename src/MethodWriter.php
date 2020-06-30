@@ -30,8 +30,9 @@ final class MethodWriter
         $this->factory = $factory;
     }
 
-    public function write(WriterInterface $writer): void
+    public function write(ReferenceHighlight $referenceHighlight, WriterInterface $writer): void
     {
+        $isConstruct = $this->reflection->getName() === '__construct';
         $writer->write('### ' . $this->reflection->getName() . '()' . PHP_EOL . PHP_EOL);
         $docComment = $this->reflection->getDocComment();
         if ($docComment !== false) {
@@ -51,26 +52,26 @@ final class MethodWriter
          * @var ReflectionParameter[] $parameters
          */
         $parameters = $this->reflection->getParameters();
-        if (count($parameters) > 0) {
+        if ($this->reflection->getNumberOfParameters() > 0) {
             $writer->write('#### Parameters' . PHP_EOL . PHP_EOL);
             foreach ($parameters as $parameter) {
                 $parameterWriter = new ParameterWriter($parameter);
-                $parameterWriter->write($writer);
+                $parameterWriter->write($referenceHighlight, $writer);
             }
-            $writer->write(PHP_EOL);
+            if (!$isConstruct) {
+                $writer->write(PHP_EOL);
+            }
         }
-        if ($this->reflection->getName() !== '__construct') {
+        if (!$isConstruct) {
             $writer->write('#### Return' . PHP_EOL . PHP_EOL);
             $return = (string) $this->reflection->getReturnType();
             if ($return === '') {
                 $return = 'void';
             } else {
-                $return = (new Reference($return))->getHighligh();
+                $return = $referenceHighlight
+                    ->getHighlightTo(new Reference($return));
             }
-            $writer->write($return . PHP_EOL . PHP_EOL);
+            $writer->write($return . PHP_EOL);
         }
-        $writer->write(
-            '---' . PHP_EOL . PHP_EOL
-        );
     }
 }

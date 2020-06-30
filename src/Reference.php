@@ -13,50 +13,74 @@ declare(strict_types=1);
 
 namespace Chevere\ReferenceMd;
 
+use Chevere\Components\Str\Str;
 use Chevere\Components\Str\StrBool;
 
 final class Reference
 {
-    private string $name = '';
+    private string $name;
+
+    // private ReferenceHighlight $highlight;
+
+    private bool $isLinked;
+
+    private string $shortName;
+
+    private string $base = '';
+
+    private string $path;
 
     public function __construct(string $name)
     {
         $this->name = $name;
         $this->isLinked = (new StrBool($name))
             ->startsWith('Chevere\\');
-    }
-
-    public function getShortName(): string
-    {
-        if ($this->isLinked === false) {
-            return $this->name;
+        $this->setShortName();
+        if ($this->isLinked) {
+            $this->base = (new Str($this->name))->replaceLast($this->shortName, '')->toString();
         }
-        $explode = explode('\\', $this->name);
-
-        return $explode[array_key_last($explode)];
+        $this->path = str_replace('\\', '/', $this->name);
     }
 
-    public function getHighligh(): string
+    public function name(): string
     {
-        if ($this->isLinked === false) {
-            return $this->name;
-        }
-
-        return strtr('[%type%](%link%)', [
-            '%type%' => $this->getShortName(),
-            '%link%' => $this->getUrl(),
-        ]);
+        return $this->name;
     }
 
-    public function getUrl(): string
+    public function shortName(): string
     {
-        $slashes = str_replace('\\', '/', $this->name);
+        return $this->shortName;
+    }
 
-        return './references/' . $slashes . '.md';
+    public function markdownName(): string
+    {
+        return $this->shortName . '.md';
     }
 
     public function isLinked(): bool
     {
         return $this->isLinked;
+    }
+
+    public function base(): string
+    {
+        return $this->base;
+    }
+
+    public function path(): string
+    {
+        return $this->path;
+    }
+
+    private function setShortName(): void
+    {
+        if ($this->isLinked === false) {
+            $this->shortName = $this->name;
+
+            return;
+        }
+        $explode = explode('\\', $this->name);
+
+        $this->shortName = $explode[array_key_last($explode)];
     }
 }

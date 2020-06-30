@@ -11,21 +11,25 @@
 
 declare(strict_types=1);
 
+use Chevere\Components\Filesystem\FileFromString;
 use Chevere\Components\Writer\StreamWriterFromString;
 use Chevere\ReferenceMd\InterfaceWriter;
-use Chevere\ReferenceMd\MethodWriter;
 use Chevere\ReferenceMd\Reference;
+use Chevere\ReferenceMd\ReferenceHighlight;
 use Chevere\ReferenceMd\ReflectionFileInterface;
-use Go\ParserReflection\ReflectionClassConstant;
-use Go\ParserReflection\ReflectionMethod;
-use phpDocumentor\Reflection\DocBlockFactory;
 
 require 'vendor/autoload.php';
 
 $remote = 'https://github.com/chevere/chevere/blob/master/';
-$target = 'interfaces/Message/MessageInterface.php';
+$target = 'interfaces/Cache/CacheInterface.php';
 $remoteUrl = $remote . $target;
 $reflection = new ReflectionFileInterface('vendor/chevere/chevere/' . $target);
+$saveAs = $reflection->interface()->getName() . '.md';
+$saveAs = __DIR__ . '/reference/' . str_replace('\\', '/', $saveAs);
+$file = new FileFromString($saveAs);
+if (!$file->exists()) {
+    $file->create();
+}
 $interfaceWriter = new InterfaceWriter($remoteUrl, $reflection);
-$writer = new StreamWriterFromString(__DIR__ . '/md.md', 'w');
+$writer = new StreamWriterFromString($saveAs, 'w');
 $interfaceWriter->write($writer);

@@ -25,11 +25,12 @@ final class ParameterWriter
         $this->reflection = $reflection;
     }
 
-    public function write(WriterInterface $writer): void
+    public function write(ReferenceHighlight $referenceHighlight, WriterInterface $writer): void
     {
         $type = $this->reflection->getType();
+
         $writer->write(
-            '- ' . (new Reference((string) $type))->getHighligh() .
+            '- ' . $referenceHighlight->getHighlightTo(new Reference((string) $type)) .
             ' `$' . $this->reflection->getName() . '`' . PHP_EOL
         );
     }

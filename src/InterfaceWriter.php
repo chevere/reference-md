@@ -45,7 +45,7 @@ final class InterfaceWriter
         if ($extends !== []) {
             $writer->write('## Extends' . PHP_EOL . PHP_EOL);
             foreach ($extends as $extendFqn) {
-                $writer->write('- [' . (new Reference($extendFqn))->getShortName() . ']()' . PHP_EOL);
+                $writer->write('- [' . (new Reference($extendFqn))->shortName() . ']()' . PHP_EOL);
             }
             $writer->write(PHP_EOL);
         }
@@ -76,7 +76,9 @@ final class InterfaceWriter
                     '```' . PHP_EOL . PHP_EOL
                 );
             }
-            $writer->write(PHP_EOL);
+            if (count($constants) > 1) {
+                $writer->write(PHP_EOL);
+            }
         }
         /**
          * @var ReflectionMethod[]
@@ -90,7 +92,15 @@ final class InterfaceWriter
             );
             foreach ($methods as $method) {
                 $methodWriter = new MethodWriter($method, $this->docsFactory);
-                $methodWriter->write($writer);
+                $methodWriter->write(
+                    new ReferenceHighlight(
+                        new Reference($interface->getName())
+                    ),
+                    $writer
+                );
+                $writer->write(
+                    PHP_EOL . '---' . PHP_EOL . PHP_EOL
+                );
             }
         }
     }
