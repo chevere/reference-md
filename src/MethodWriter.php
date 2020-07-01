@@ -15,7 +15,6 @@ namespace Chevere\ReferenceMd;
 
 use Chevere\Interfaces\Writer\WriterInterface;
 use Go\ParserReflection\ReflectionParameter;
-use phpDocumentor\Reflection\DocBlock\Tag;
 use phpDocumentor\Reflection\DocBlock\Tags\Throws;
 use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Types\ContextFactory;
@@ -56,13 +55,11 @@ final class MethodWriter
             $index = 0;
             foreach ($parameters as $parameter) {
                 $index++;
-                $writer->write("\n$index . ");
+                $writer->write("\n$index. ");
                 $parameterWriter = new ParameterWriter($parameter);
                 $parameterWriter->write($referenceHighlight, $writer);
             }
             $writer->write(PHP_EOL);
-            // if ($isConstruct === false) {
-            // }
         }
         if (isset($docBlock)) {
             /**
@@ -73,18 +70,25 @@ final class MethodWriter
                 foreach ($throwTags as $throw) {
                     $throwType = ltrim($throw->getType()->__toString(), '\\');
                     $throwReference = new Reference($throwType);
-                    $writer->write(
-                        "\n::: danger THROWS\n" .
-                        $referenceHighlight->getHighlightTo($throwReference) . "\n"
-                    );
-                    if ($throw->getDescription() !== null && $throw->getDescription()->__toString() !== '') {
-                        $writer->write($throw->getDescription()->__toString() . "\n");
+                    if (!class_exists($throwType)) {
+                        $writer->write(
+                            "\n::: danger THROWS ⚠\n" .
+                            'Unknown type `' . $throwReference->shortName() . " declared in `@throws` tag`\n" .
+                            ":::\n"
+                        );
+                    } else {
+                        $writer->write(
+                            "\n::: danger THROWS\n" .
+                            $referenceHighlight->getHighlightTo($throwReference) . "\n"
+                        );
+                        if ($throw->getDescription() !== null && $throw->getDescription()->__toString() !== '') {
+                            $writer->write($throw->getDescription()->__toString() . "\n");
+                        }
+                        $writer->write(":::\n");
                     }
-                    $writer->write(':::' . "\n");
                 }
             }
         }
-
         if (!$isConstruct) {
             $return = (string) $this->reflection->getReturnType();
             if ($return === '') {
@@ -99,7 +103,6 @@ final class MethodWriter
                 ':::' . "\n"
             );
         }
-
         if (isset($docBlock)) {
             $description = (string) $docBlock->getDescription();
             if ($description !== '') {
