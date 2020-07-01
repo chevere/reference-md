@@ -19,6 +19,105 @@ use Chevere\ReferenceMd\Reference;
 
 final class ReferenceHighlight
 {
+    const PHP_CLASSES = [
+        'AppendIterator',
+        'ArgumentCountError',
+        'ArithmeticError',
+        'ArrayIterator',
+        'ArrayObject',
+        'AssertionError',
+        'BadFunctionCallException',
+        'BadMethodCallException',
+        'CachingIterator',
+        'CallbackFilterIterator',
+        'Closure',
+        'CompileError',
+        'Countable',
+        'DateInterval',
+        'DatePeriod',
+        'DateTime',
+        'DateTimeImmutable',
+        'DateTimeZone',
+        'Directory',
+        'DirectoryIterator',
+        'DivisionByZeroError',
+        'DomainException',
+        'EmptyIterator',
+        'Error',
+        'ErrorException',
+        'Exception',
+        'FilesystemIterator',
+        'FilterIterator',
+        'Generator',
+        'GlobIterator',
+        'HashContext',
+        'InfiniteIterator',
+        'InvalidArgumentException',
+        'IteratorIterator',
+        'LengthException',
+        'LibXMLError',
+        'LimitIterator',
+        'LogicException',
+        'MultipleIterator',
+        'NoRewindIterator',
+        'OuterIterator',
+        'OutOfBoundsException',
+        'OutOfRangeException',
+        'OverflowException',
+        'ParentIterator',
+        'ParseError',
+        'php_user_filter',
+        'RangeException',
+        'RecursiveArrayIterator',
+        'RecursiveCachingIterator',
+        'RecursiveCallbackFilterIterator',
+        'RecursiveDirectoryIterator',
+        'RecursiveFilterIterator',
+        'RecursiveIterator',
+        'RecursiveIteratorIterator',
+        'RecursiveRegexIterator',
+        'RecursiveTreeIterator',
+        'Reflection',
+        'ReflectionClass',
+        'ReflectionClassConstant',
+        'ReflectionException',
+        'ReflectionExtension',
+        'ReflectionFunction',
+        'ReflectionFunctionAbstract',
+        'ReflectionGenerator',
+        'ReflectionMethod',
+        'ReflectionNamedType',
+        'ReflectionObject',
+        'ReflectionParameter',
+        'ReflectionProperty',
+        'ReflectionReference',
+        'ReflectionType',
+        'ReflectionZendExtension',
+        'RegexIterator',
+        'RuntimeException',
+        'SeekableIterator',
+        'SessionHandler',
+        'SplDoublyLinkedList',
+        'SplFileInfo',
+        'SplFileObject',
+        'SplFixedArray',
+        'SplHeap',
+        'SplMaxHeap',
+        'SplMinHeap',
+        'SplObjectStorage',
+        'SplPriorityQueue',
+        'SplQueue',
+        'SplStack',
+        'SplTempFileObject',
+        'Throwable',
+        'TypeError',
+        'UnderflowException',
+        'UnexpectedValueException',
+        'WeakReference',
+    ];
+
+    const PHP_URL_MANUAL = 'https://www.php.net/manual/';
+
     private Reference $reference;
 
     public function __construct(Reference $reference)
@@ -68,16 +167,26 @@ final class ReferenceHighlight
 
     public function getHighlightTo(Reference $targetReference): string
     {
-        if ($targetReference->isLinked() === false) {
-            return $targetReference->name();
-        }
         $link = $this->getLinkTo($targetReference);
-        if (strpos($link, '.', 1) !== false) {
-            return '[' . $targetReference->shortName() . ']('
-            . $link
-            . ')';
+        if ($targetReference->isLinked() === false) {
+            if (in_array($targetReference->name(), self::PHP_CLASSES)) {
+                $link = $this->getPHPManualPage($targetReference->name());
+            }
+        }
+        $linkBool = new StrBool($link);
+        if ($linkBool->startsWith('.') || $linkBool->startsWith('http')) {
+            return '[' . $targetReference->shortName() . ']'
+            . '(' . $link . ')';
         }
 
-        return $targetReference->shortName();
+        return $link;
+    }
+
+    private function getPHPManualPage(string $className): string
+    {
+        $className = strtolower($className);
+        $className = str_replace('_', '-', $className);
+
+        return self::PHP_URL_MANUAL . 'class.' . $className;
     }
 }

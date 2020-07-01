@@ -28,10 +28,9 @@ final class ParameterWriter
     public function write(ReferenceHighlight $referenceHighlight, WriterInterface $writer): void
     {
         $type = $this->reflection->getType();
-
         $writer->write(
-            '- ' . $referenceHighlight->getHighlightTo(new Reference((string) $type)) .
-            ' `$' . $this->reflection->getName() . '`' . PHP_EOL
+            $referenceHighlight->getHighlightTo(new Reference((string) $type)) .
+            ' `$' . $this->reflection->getName() . '`'
         );
     }
 }

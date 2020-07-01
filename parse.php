@@ -11,25 +11,45 @@
 
 declare(strict_types=1);
 
-use Chevere\Components\Filesystem\FileFromString;
+use Chevere\Components\Filesystem\DirFromString;
+use Chevere\Components\ThrowableHandler\Documents\ConsoleDocument;
+use Chevere\Components\ThrowableHandler\ThrowableHandler;
+use Chevere\Components\ThrowableHandler\ThrowableRead;
 use Chevere\Components\Writer\StreamWriterFromString;
-use Chevere\ReferenceMd\InterfaceWriter;
-use Chevere\ReferenceMd\Reference;
-use Chevere\ReferenceMd\ReferenceHighlight;
-use Chevere\ReferenceMd\ReflectionFileInterface;
+use Chevere\ReferenceMd\PHPIterator;
 
 require 'vendor/autoload.php';
 
 $remote = 'https://github.com/chevere/chevere/blob/master/';
-$target = 'interfaces/Cache/CacheInterface.php';
-$remoteUrl = $remote . $target;
-$reflection = new ReflectionFileInterface('vendor/chevere/chevere/' . $target);
-$saveAs = $reflection->interface()->getName() . '.md';
-$saveAs = __DIR__ . '/reference/' . str_replace('\\', '/', $saveAs);
-$file = new FileFromString($saveAs);
-if (!$file->exists()) {
-    $file->create();
+$source = '/home/rodolfo/git/chevere/chevere/';
+$root = '/home/rodolfo/git/chevere/chevere/';
+$target = '/home/rodolfo/git/chevere/docs/reference/';
+$targetDir = new DirFromString($target);
+$rootDir = new DirFromString($root);
+$README = new StreamWriterFromString(
+    $targetDir->path()->getChild('README.md')->absolute(),
+    'w'
+);
+$README->write(
+    "---\n" .
+    "sidebar: false\n" .
+    "editLink: false\n" .
+    "---\n" .
+    "\n# Reference\n" .
+    "\nThis is the public reference for exceptions and interfaces.\n"
+);
+try {
+    foreach ([
+        'exceptions/' => 'Exceptions',
+        'interfaces/' => 'Interfaces',
+    ] as $path => $title) {
+        $sourceDir = $rootDir->getChild($path);
+        $iterator = new PHPIterator($title, $sourceDir, $rootDir);
+        $iterator->write($remote, $targetDir);
+        $README->write("\n- [$title](./" . $iterator->readme() . ')');
+    }
+} catch (Exception $e) {
+    $handler = new ThrowableHandler(new ThrowableRead($e));
+    $document = new ConsoleDocument($handler);
+    echo $document->toString() . "\n";
 }
-$interfaceWriter = new InterfaceWriter($remoteUrl, $reflection);
-$writer = new StreamWriterFromString($saveAs, 'w');
-$interfaceWriter->write($writer);

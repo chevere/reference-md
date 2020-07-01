@@ -37,26 +37,44 @@ final class InterfaceWriter
     {
         $interface = $this->reflectionFile->interface();
         $writer->write(
-            '`' . $interface->getNamespaceName() . '`' . PHP_EOL . PHP_EOL .
-            '# ' . $interface->getShortName() . PHP_EOL . PHP_EOL .
-            "[view source]($this->sourceUrl)" . PHP_EOL . PHP_EOL
+            "---\n" .
+            "editLink: false\n" .
+            "---\n\n" .
+            '# ' . $interface->getShortName() . "\n\n" .
+            '`' . $interface->getName() . '`' . "\n\n" .
+            "[view source]($this->sourceUrl)" . "\n"
         );
-        $extends = $interface->getInterfaceNames();
-        if ($extends !== []) {
-            $writer->write('## Extends' . PHP_EOL . PHP_EOL);
-            foreach ($extends as $extendFqn) {
-                $writer->write('- [' . (new Reference($extendFqn))->shortName() . ']()' . PHP_EOL);
+        $referenceHighligh = new ReferenceHighlight(
+            new Reference($interface->getName())
+        );
+        $implements = $interface->getInterfaceNames();
+        if ($implements !== []) {
+            $writer->write("\n## Implements\n\n");
+            foreach ($implements as $fqn) {
+                $writer->write(
+                    '- ' .
+                    $referenceHighligh->getHighlightTo(new Reference($fqn)) . "\n"
+                );
             }
-            $writer->write(PHP_EOL);
+        }
+        if ($interface->getParentClass() !== false) {
+            $extends = $interface->getParentClass()->getName();
+        }
+        if (isset($extends)) {
+            $writer->write("\n## Extends\n\n");
+            $writer->write(
+                '- ' .
+                $referenceHighligh->getHighlightTo(new Reference($extends)) . "\n"
+            );
         }
         if ($this->reflectionFile->hasDocBlock()) {
             $writer->write(
-                '## Description' . PHP_EOL . PHP_EOL .
-                $this->reflectionFile->docBlock()->getSummary() . PHP_EOL . PHP_EOL
+                "\n## Description\n" .
+                "\n" . $this->reflectionFile->docBlock()->getSummary() . "\n"
             );
             $docDesc = (string) $this->reflectionFile->docBlock()->getDescription();
             if ($docDesc !== '') {
-                $writer->write($docDesc . PHP_EOL . PHP_EOL);
+                $writer->write("\n$docDesc\n");
             }
         }
         /**
@@ -64,20 +82,15 @@ final class InterfaceWriter
          */
         $constants = $interface->getConstants();
         if ($constants !== []) {
-            $writer->write(
-                '## Constants' . PHP_EOL . PHP_EOL
-            );
+            $writer->write("\n## Constants\n");
             foreach ($constants as $const => $value) {
                 $writer->write(
-                    '### ' . $const . PHP_EOL . PHP_EOL .
-                    'Type `' . gettype($value) . '`' . PHP_EOL . PHP_EOL .
-                    '```php' . PHP_EOL .
-                    var_export($value, true) . PHP_EOL .
-                    '```' . PHP_EOL . PHP_EOL
+                    "\n### $const\n\n" .
+                    'Type `' . gettype($value) . "`\n\n" .
+                    "```php\n" .
+                    var_export($value, true) . "\n" .
+                    "```\n"
                 );
-            }
-            if (count($constants) > 1) {
-                $writer->write(PHP_EOL);
             }
         }
         /**
@@ -86,20 +99,20 @@ final class InterfaceWriter
         $methods = $interface->getMethods();
         if ($methods !== []) {
             $writer->write(
-                '## Methods' . PHP_EOL .
-                PHP_EOL . '---' . PHP_EOL .
-                PHP_EOL
+                "\n## Methods\n"
             );
             foreach ($methods as $method) {
+                if (!$method->isUserDefined()) {
+                    continue;
+                }
+                $writer->write("\n### " . $method->getName() . "()\n");
                 $methodWriter = new MethodWriter($method, $this->docsFactory);
                 $methodWriter->write(
-                    new ReferenceHighlight(
-                        new Reference($interface->getName())
-                    ),
+                    new Reference($interface->getName()),
                     $writer
                 );
                 $writer->write(
-                    PHP_EOL . '---' . PHP_EOL . PHP_EOL
+                    "\n---\n"
                 );
             }
         }

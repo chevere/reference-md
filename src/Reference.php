@@ -72,6 +72,11 @@ final class Reference
         return $this->path;
     }
 
+    public function markdownPath(): string
+    {
+        return $this->path . '.md';
+    }
+
     private function setShortName(): void
     {
         if ($this->isLinked === false) {

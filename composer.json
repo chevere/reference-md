@@ -3,12 +3,10 @@
     "description": "Generates markdown docs for Chevere flavours",
     "type": "library",
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Rodolfo Berrios",
-            "email": "rodolfo@chevere.org"
-        }
-    ],
+    "authors": [{
+        "name": "Rodolfo Berrios",
+        "email": "rodolfo@chevere.org"
+    }],
     "repositories": [{
         "type": "vcs",
         "url": "https://github.com/chevere/chevere"

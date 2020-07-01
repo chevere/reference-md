@@ -14,9 +14,12 @@ declare(strict_types=1);
 namespace Chevere\ReferenceMd;
 
 use Chevere\Interfaces\Writer\WriterInterface;
-use Go\ParserReflection\ReflectionMethod;
 use Go\ParserReflection\ReflectionParameter;
+use phpDocumentor\Reflection\DocBlock\Tag;
+use phpDocumentor\Reflection\DocBlock\Tags\Throws;
 use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Types\ContextFactory;
+use ReflectionMethod;
 
 final class MethodWriter
 {
@@ -30,22 +33,18 @@ final class MethodWriter
         $this->factory = $factory;
     }
 
-    public function write(ReferenceHighlight $referenceHighlight, WriterInterface $writer): void
+    public function write(Reference $reference, WriterInterface $writer): void
     {
+        $contextFactory = new ContextFactory();
+        $context = $contextFactory->createFromReflector($this->reflection);
+        $referenceHighlight = new ReferenceHighlight($reference);
         $isConstruct = $this->reflection->getName() === '__construct';
-        $writer->write('### ' . $this->reflection->getName() . '()' . PHP_EOL . PHP_EOL);
         $docComment = $this->reflection->getDocComment();
         if ($docComment !== false) {
-            $docBlock = $this->factory->create((string) $docComment);
+            $docBlock = $this->factory->create((string) $docComment, $context);
             $summary = $docBlock->getSummary();
             if ($summary !== '') {
-                $writer->write(
-                    '> ' . $summary . PHP_EOL . PHP_EOL
-                );
-            }
-            $description = (string) $docBlock->getDescription();
-            if ($description !== '') {
-                $writer->write($description . PHP_EOL . PHP_EOL);
+                $writer->write("\n$summary\n");
             }
         }
         /**
@@ -53,17 +52,40 @@ final class MethodWriter
          */
         $parameters = $this->reflection->getParameters();
         if ($this->reflection->getNumberOfParameters() > 0) {
-            $writer->write('#### Parameters' . PHP_EOL . PHP_EOL);
+            $writer->write("\n**Parameters**\n");
+            $index = 0;
             foreach ($parameters as $parameter) {
+                $index++;
+                $writer->write("\n$index . ");
                 $parameterWriter = new ParameterWriter($parameter);
                 $parameterWriter->write($referenceHighlight, $writer);
             }
-            if (!$isConstruct) {
-                $writer->write(PHP_EOL);
+            $writer->write(PHP_EOL);
+            // if ($isConstruct === false) {
+            // }
+        }
+        if (isset($docBlock)) {
+            /**
+             * @var Throws[] $throwTags
+             */
+            $throwTags = $docBlock->getTagsByName('throws');
+            if ($throwTags !== []) {
+                foreach ($throwTags as $throw) {
+                    $throwType = ltrim($throw->getType()->__toString(), '\\');
+                    $throwReference = new Reference($throwType);
+                    $writer->write(
+                        "\n::: danger THROWS\n" .
+                        $referenceHighlight->getHighlightTo($throwReference) . "\n"
+                    );
+                    if ($throw->getDescription() !== null && $throw->getDescription()->__toString() !== '') {
+                        $writer->write($throw->getDescription()->__toString() . "\n");
+                    }
+                    $writer->write(':::' . "\n");
+                }
             }
         }
+
         if (!$isConstruct) {
-            $writer->write('#### Return' . PHP_EOL . PHP_EOL);
             $return = (string) $this->reflection->getReturnType();
             if ($return === '') {
                 $return = 'void';
@@ -71,7 +93,18 @@ final class MethodWriter
                 $return = $referenceHighlight
                     ->getHighlightTo(new Reference($return));
             }
-            $writer->write($return . PHP_EOL);
+            $writer->write(
+                "\n::: tip RETURN\n" .
+                $return . "\n" .
+                ':::' . "\n"
+            );
+        }
+
+        if (isset($docBlock)) {
+            $description = (string) $docBlock->getDescription();
+            if ($description !== '') {
+                $writer->write("\n$description\n");
+            }
         }
     }
 }

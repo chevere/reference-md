@@ -27,9 +27,9 @@ final class ReflectionFileInterface
 
     private DocBlock $docBlock;
 
-    public function __construct(string $path)
+    public function __construct(ReflectionFile $reflectionFile)
     {
-        $reflection = new ReflectionFile($path);
+        $reflection = $reflectionFile;
         /**
          * @var ReflectionFileNamespace[]
          */
