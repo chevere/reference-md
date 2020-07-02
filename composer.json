@@ -7,10 +7,6 @@
         "name": "Rodolfo Berrios",
         "email": "rodolfo@chevere.org"
     }],
-    "repositories": [{
-        "type": "vcs",
-        "url": "https://github.com/chevere/chevere"
-    }],
     "require": {
         "chevere/chevere": "dev-master",
         "phpdocumentor/reflection-docblock": "^5.1"
