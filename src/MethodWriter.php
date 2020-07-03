@@ -67,26 +67,24 @@ final class MethodWriter
              */
             $throwTags = $docBlock->getTagsByName('throws');
             if ($throwTags !== []) {
+                $writer->write("\n::: danger THROWS\n");
                 foreach ($throwTags as $throw) {
                     $throwType = ltrim($throw->getType()->__toString(), '\\');
                     $throwReference = new Reference($throwType);
                     if (!class_exists($throwType)) {
                         $writer->write(
-                            "\n::: danger THROWS ⚠\n" .
-                            'Unknown type `' . $throwReference->shortName() . " declared in `@throws` tag`\n" .
-                            ":::\n"
+                            '- ⚠ Unknown type `' . $throwReference->shortName() . "` declared in `@throws` tag`\n"
                         );
                     } else {
                         $writer->write(
-                            "\n::: danger THROWS\n" .
-                            $referenceHighlight->getHighlightTo($throwReference) . "\n"
+                            '- ' . $referenceHighlight->getHighlightTo($throwReference) . "\n"
                         );
                         if ($throw->getDescription() !== null && $throw->getDescription()->__toString() !== '') {
                             $writer->write($throw->getDescription()->__toString() . "\n");
                         }
-                        $writer->write(":::\n");
                     }
                 }
+                $writer->write(":::\n");
             }
         }
         if (!$isConstruct) {

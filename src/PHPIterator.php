@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Chevere\ReferenceMd;
 
 use Chevere\Components\Filesystem\FileFromString;
+use Chevere\Components\Filesystem\FilesystemFactory;
 use Chevere\Components\Str\Str;
 use Chevere\Components\Writer\StreamWriterFromString;
 use Chevere\Interfaces\Filesystem\DirInterface;
@@ -94,7 +95,7 @@ class PHPIterator
                 continue;
             }
             $filePath = $writeDir->path()->absolute() . str_replace('\\', '/', $fileName);
-            $file = new FileFromString($filePath);
+            $file = (new FilesystemFactory)->getFileFromString($filePath);
             if (!$file->exists()) {
                 $file->create();
             }

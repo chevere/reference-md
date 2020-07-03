@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-use Chevere\Components\Filesystem\DirFromString;
+use Chevere\Components\Filesystem\FilesystemFactory;
 use Chevere\Components\ThrowableHandler\Documents\ConsoleDocument;
 use Chevere\Components\ThrowableHandler\ThrowableHandler;
 use Chevere\Components\ThrowableHandler\ThrowableRead;
@@ -24,8 +24,9 @@ $remote = 'https://github.com/chevere/chevere/blob/master/';
 $source = '/home/rodolfo/git/chevere/chevere/';
 $root = '/home/rodolfo/git/chevere/chevere/';
 $target = '/home/rodolfo/git/chevere/docs/reference/';
-$targetDir = new DirFromString($target);
-$rootDir = new DirFromString($root);
+$filesystemFactory = new FilesystemFactory;
+$targetDir = $filesystemFactory->getDirFromString($target);
+$rootDir = $filesystemFactory->getDirFromString($root);
 $README = new StreamWriterFromString(
     $targetDir->path()->getChild('README.md')->absolute(),
     'w'
