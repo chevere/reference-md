@@ -37,7 +37,7 @@ final class Reference
             ->startsWith('Chevere\\');
         $this->setShortName();
         if ($this->isLinked) {
-            $this->base = (new Str($this->name))->replaceLast($this->shortName, '')->toString();
+            $this->base = (new Str($this->name))->withReplaceLast($this->shortName, '')->toString();
         }
         $this->path = str_replace('\\', '/', $this->name);
     }

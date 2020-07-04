@@ -152,8 +152,8 @@ final class ReferenceHighlight
                 $levels++;
             } else {
                 $return = $toStr
-                    ->replaceFirst($try, str_repeat('../', $levels))
-                    ->replaceLast(
+                    ->withReplaceFirst($try, str_repeat('../', $levels))
+                    ->withReplaceLast(
                         $targetReference->shortName(),
                         $targetReference->markdownName()
                     )
