@@ -11,27 +11,31 @@
 
 declare(strict_types=1);
 
-use Chevere\Components\Filesystem\FilesystemFactory;
-use Chevere\Components\ThrowableHandler\Documents\ConsoleDocument;
-use Chevere\Components\ThrowableHandler\ThrowableHandler;
-use Chevere\Components\ThrowableHandler\ThrowableRead;
 use Chevere\Components\Writer\StreamWriterFromString;
 use Chevere\ReferenceMd\PHPIterator;
+use function Chevere\Components\Filesystem\getDirFromString;
 
 require 'vendor/autoload.php';
+
+$hrTime = (int) hrtime(true);
+
+set_error_handler('Chevere\Components\ThrowableHandler\errorsAsExceptions');
+set_exception_handler('Chevere\Components\ThrowableHandler\consoleHandler');
 
 $remote = 'https://github.com/chevere/chevere/blob/master/';
 $source = '/home/rodolfo/git/chevere/chevere/';
 $root = '/home/rodolfo/git/chevere/chevere/';
 $target = '/home/rodolfo/git/chevere/docs/reference/';
-$filesystemFactory = new FilesystemFactory;
-$targetDir = $filesystemFactory->getDirFromString($target);
-$rootDir = $filesystemFactory->getDirFromString($root);
-$README = new StreamWriterFromString(
-    $targetDir->path()->getChild('README.md')->absolute(),
-    'w'
-);
-$README->write(
+$targetDir = getDirFromString($target);
+$rootDir = getDirFromString($root);
+if (!$targetDir->exists()) {
+    $targetDir->create();
+}
+$readmePath = $targetDir->path()->getChild('README.md')->absolute();
+$readme = new StreamWriterFromString($readmePath, 'w');
+$log = new StreamWriterFromString('php://stdout', 'w');
+$log->write("📝 Writing reference readme @ $readmePath\n");
+$readme->write(
     "---\n" .
     "sidebar: false\n" .
     "editLink: false\n" .
@@ -39,18 +43,16 @@ $README->write(
     "\n# Reference\n" .
     "\nThis is the public reference for exceptions and interfaces.\n"
 );
-try {
-    foreach ([
-        'exceptions/' => 'Exceptions',
-        'interfaces/' => 'Interfaces',
-    ] as $path => $title) {
-        $sourceDir = $rootDir->getChild($path);
-        $iterator = new PHPIterator($title, $sourceDir, $rootDir);
-        $iterator->write($remote, $targetDir);
-        $README->write("\n- [$title](./" . $iterator->readme() . ')');
-    }
-} catch (Exception $e) {
-    $handler = new ThrowableHandler(new ThrowableRead($e));
-    $document = new ConsoleDocument($handler);
-    echo $document->toString() . "\n";
+foreach ([
+    'exceptions/' => 'Exceptions',
+    'interfaces/' => 'Interfaces',
+] as $path => $title) {
+    $log->write("\n✨ Process started for $path ($title)\n");
+    $sourceDir = $rootDir->getChild($path);
+    $iterator = new PHPIterator($title, $sourceDir, $rootDir);
+    $iterator->write($remote, $targetDir, $log);
+    $readme->write("\n- [$title](./" . $iterator->readme() . ')');
 }
+$timeTook = number_format(((int) hrtime(true) - $hrTime) / 1e+6, 0) . ' ms';
+$log->write("\n🎉 Done in $timeTook!\n");
+die();

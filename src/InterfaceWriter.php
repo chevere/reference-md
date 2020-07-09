@@ -106,7 +106,10 @@ final class InterfaceWriter
                     continue;
                 }
                 $writer->write("\n### " . $method->getName() . "()\n");
-                $methodWriter = new MethodWriter($method, $this->docsFactory);
+                $methodWriter = new MethodWriter(
+                    $method,
+                    $this->docsFactory
+                );
                 $methodWriter->write(
                     new Reference($interface->getName()),
                     $writer

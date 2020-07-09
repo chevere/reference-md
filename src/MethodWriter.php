@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Chevere\ReferenceMd;
 
 use Chevere\Interfaces\Writer\WriterInterface;
+use Go\ParserReflection\ReflectionMethod as GoReflectionMethod;
 use Go\ParserReflection\ReflectionParameter;
 use phpDocumentor\Reflection\DocBlock\Tags\Throws;
 use phpDocumentor\Reflection\DocBlockFactory;
@@ -28,6 +29,12 @@ final class MethodWriter
 
     public function __construct(ReflectionMethod $reflection, DocBlockFactory $factory)
     {
+        if ($reflection instanceof GoReflectionMethod) {
+            $reflection = new ReflectionMethod(
+                $reflection->getDeclaringClass()->getName(),
+                $reflection->getName()
+            );
+        }
         $this->reflection = $reflection;
         $this->factory = $factory;
     }
@@ -88,7 +95,9 @@ final class MethodWriter
             }
         }
         if (!$isConstruct) {
-            $return = (string) $this->reflection->getReturnType();
+            $return = $this->reflection->hasReturnType()
+                ? $this->reflection->getReturnType()->getName()
+                : '';
             if ($return === '') {
                 $return = 'void';
             } else {

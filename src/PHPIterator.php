@@ -25,6 +25,7 @@ use RecursiveFilterIterator;
 use RecursiveIteratorIterator;
 use Throwable;
 use UnexpectedValueException;
+use function Chevere\Components\Filesystem\getFileFromString;
 
 class PHPIterator
 {
@@ -62,14 +63,16 @@ class PHPIterator
         return $this->readme;
     }
 
-    public function write(string $remote, DirInterface $writeDir): void
+    public function write(string $remote, DirInterface $writeDir, WriterInterface $log): void
     {
         if (!$writeDir->exists()) {
             $writeDir->create();
         }
         $files = [];
-        $README = new StreamWriterFromString($writeDir->path()->absolute() . $this->readme, 'w');
-        $README->write(
+        $readmePath = $writeDir->path()->absolute() . $this->readme;
+        $readme = new StreamWriterFromString($readmePath, 'w');
+        $log->write('📝 Writing ' . $this->title . " readme @ $readmePath\n");
+        $readme->write(
             "---\n" .
             "sidebar: false\n" .
             "editLink: false\n" .
@@ -95,7 +98,7 @@ class PHPIterator
                 continue;
             }
             $filePath = $writeDir->path()->absolute() . str_replace('\\', '/', $fileName);
-            $file = (new FilesystemFactory)->getFileFromString($filePath);
+            $file = getFileFromString($filePath);
             if (!$file->exists()) {
                 $file->create();
             }
@@ -104,13 +107,14 @@ class PHPIterator
             $shortName = $reflection->interface()->getShortName();
             $letter = $explode[2];
             if ($currentLetter !== $letter) {
-                $README->write("\n\n## $letter\n");
+                $readme->write("\n\n## $letter\n");
                 $currentLetter = $letter;
                 $letters[] = $currentLetter;
             }
-            $README->write(
+            $readme->write(
                 "\n  - [$shortName](./" . $reference->markdownPath() . ')'
             );
+            $log->write("- $filePath\n");
             $interfaceWriter = new InterfaceWriter($remoteUrl, $reflection);
             $writer = new StreamWriterFromString($filePath, 'w');
             $interfaceWriter->write($writer);

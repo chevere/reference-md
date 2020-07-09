@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Chevere\ReferenceMd;
 
 use Chevere\Interfaces\Writer\WriterInterface;
-use Go\ParserReflection\ReflectionParameter;
+use ReflectionParameter;
 
 final class ParameterWriter
 {
@@ -27,7 +27,9 @@ final class ParameterWriter
 
     public function write(ReferenceHighlight $referenceHighlight, WriterInterface $writer): void
     {
-        $type = $this->reflection->getType();
+        $type = $this->reflection->hasType()
+            ? $this->reflection->getType()->getName()
+            : '';
         $writer->write(
             $referenceHighlight->getHighlightTo(new Reference((string) $type)) .
             ' `$' . $this->reflection->getName() . '`'
