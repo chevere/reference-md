@@ -11,9 +11,12 @@
 
 declare(strict_types=1);
 
-use Chevere\Components\Writer\StreamWriterFromString;
+use Chevere\Components\Filesystem\File;
 use Chevere\ReferenceMd\PHPIterator;
 use function Chevere\Components\Filesystem\getDirFromString;
+use function Chevere\Components\Filesystem\getFileFromString;
+use function Chevere\Components\Writer\writerForFile;
+use function Chevere\Components\Writer\writerForStream;
 
 require 'vendor/autoload.php';
 
@@ -31,10 +34,10 @@ $rootDir = getDirFromString($root);
 if (!$targetDir->exists()) {
     $targetDir->create();
 }
-$readmePath = $targetDir->path()->getChild('README.md')->absolute();
-$readme = new StreamWriterFromString($readmePath, 'w');
-$log = new StreamWriterFromString('php://stdout', 'w');
-$log->write("📝 Writing reference readme @ $readmePath\n");
+$readmeFilename = $targetDir->path()->getChild('README.md')->absolute();
+$readme = writerForFile(getFileFromString($readmeFilename), 'w');
+$log = writerForStream('php://stdout', 'w');
+$log->write("📝 Writing reference readme @ $readmeFilename\n");
 $readme->write(
     "---\n" .
     "sidebar: false\n" .

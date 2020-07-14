@@ -13,10 +13,7 @@ declare(strict_types=1);
 
 namespace Chevere\ReferenceMd;
 
-use Chevere\Components\Filesystem\FileFromString;
-use Chevere\Components\Filesystem\FilesystemFactory;
 use Chevere\Components\Str\Str;
-use Chevere\Components\Writer\StreamWriterFromString;
 use Chevere\Interfaces\Filesystem\DirInterface;
 use Chevere\Interfaces\Writer\WriterInterface;
 use Go\ParserReflection\ReflectionFile;
@@ -26,6 +23,8 @@ use RecursiveIteratorIterator;
 use Throwable;
 use UnexpectedValueException;
 use function Chevere\Components\Filesystem\getFileFromString;
+use function Chevere\Components\Writer\writerForFile;
+use function Chevere\Components\Writer\writerForStream;
 
 class PHPIterator
 {
@@ -70,7 +69,7 @@ class PHPIterator
         }
         $files = [];
         $readmePath = $writeDir->path()->absolute() . $this->readme;
-        $readme = new StreamWriterFromString($readmePath, 'w');
+        $readme = writerForStream($readmePath, 'w');
         $log->write('📝 Writing ' . $this->title . " readme @ $readmePath\n");
         $readme->write(
             "---\n" .
@@ -116,7 +115,7 @@ class PHPIterator
             );
             $log->write("- $filePath\n");
             $interfaceWriter = new InterfaceWriter($remoteUrl, $reflection);
-            $writer = new StreamWriterFromString($filePath, 'w');
+            $writer = writerForFile($file, 'w');
             $interfaceWriter->write($writer);
             continue;
         }
