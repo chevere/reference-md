@@ -58,7 +58,7 @@ final class MethodWriter
          */
         $parameters = $this->reflection->getParameters();
         if ($this->reflection->getNumberOfParameters() > 0) {
-            $writer->write("\n**Parameters**\n");
+            $writer->write("\n#### Parameters\n");
             $index = 0;
             foreach ($parameters as $parameter) {
                 $index++;
