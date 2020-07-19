@@ -26,7 +26,6 @@ use UnexpectedValueException;
 use function Chevere\Components\Filesystem\fileFromString;
 use function Chevere\Components\Writer\streamFor;
 use function Chevere\Components\Writer\writerForFile;
-use function Chevere\Components\Writer\writerForStream;
 
 class PHPIterator
 {
