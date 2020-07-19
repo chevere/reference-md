@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Chevere\ReferenceMd;
 
 use Chevere\Components\Str\Str;
+use Chevere\Components\Writer\StreamWriter;
 use Chevere\Interfaces\Filesystem\DirInterface;
 use Chevere\Interfaces\Writer\WriterInterface;
 use Go\ParserReflection\ReflectionFile;
@@ -22,7 +23,8 @@ use RecursiveFilterIterator;
 use RecursiveIteratorIterator;
 use Throwable;
 use UnexpectedValueException;
-use function Chevere\Components\Filesystem\getFileFromString;
+use function Chevere\Components\Filesystem\fileFromString;
+use function Chevere\Components\Writer\streamFor;
 use function Chevere\Components\Writer\writerForFile;
 use function Chevere\Components\Writer\writerForStream;
 
@@ -69,7 +71,7 @@ class PHPIterator
         }
         $files = [];
         $readmePath = $writeDir->path()->absolute() . $this->readme;
-        $readme = writerForStream($readmePath, 'w');
+        $readme = new StreamWriter(streamFor($readmePath, 'w'));
         $log->write('📝 Writing ' . $this->title . " readme @ $readmePath\n");
         $readme->write(
             "---\n" .
@@ -97,7 +99,7 @@ class PHPIterator
                 continue;
             }
             $filePath = $writeDir->path()->absolute() . str_replace('\\', '/', $fileName);
-            $file = getFileFromString($filePath);
+            $file = fileFromString($filePath);
             if (!$file->exists()) {
                 $file->create();
             }

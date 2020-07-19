@@ -11,10 +11,11 @@
 
 declare(strict_types=1);
 
-use Chevere\Components\Filesystem\File;
+use Chevere\Components\Writer\StreamWriter;
 use Chevere\ReferenceMd\PHPIterator;
-use function Chevere\Components\Filesystem\getDirFromString;
-use function Chevere\Components\Filesystem\getFileFromString;
+use function Chevere\Components\Filesystem\dirFromString;
+use function Chevere\Components\Filesystem\fileFromString;
+use function Chevere\Components\Writer\streamFor;
 use function Chevere\Components\Writer\writerForFile;
 use function Chevere\Components\Writer\writerForStream;
 
@@ -29,14 +30,14 @@ $remote = 'https://github.com/chevere/chevere/blob/master/';
 $source = '/home/rodolfo/git/chevere/chevere/';
 $root = '/home/rodolfo/git/chevere/chevere/';
 $target = '/home/rodolfo/git/chevere/docs/reference/';
-$targetDir = getDirFromString($target);
-$rootDir = getDirFromString($root);
+$targetDir = dirFromString($target);
+$rootDir = dirFromString($root);
 if (!$targetDir->exists()) {
     $targetDir->create();
 }
 $readmeFilename = $targetDir->path()->getChild('README.md')->absolute();
-$readme = writerForFile(getFileFromString($readmeFilename), 'w');
-$log = writerForStream('php://stdout', 'w');
+$readme = writerForFile(fileFromString($readmeFilename), 'w');
+$log = new StreamWriter(streamFor('php://stdout', 'w'));
 $log->write("📝 Writing reference readme @ $readmeFilename\n");
 $readme->write(
     "---\n" .
