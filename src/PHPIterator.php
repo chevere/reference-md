@@ -89,7 +89,9 @@ class PHPIterator
         $currentLetter = '';
         foreach ($files as $file) {
             $target = $file;
-            $remoteUrl = $remote . (new Str($target))->withReplaceFirst($this->root->path()->absolute(), '')->toString();
+            $remoteUrl = $remote . (new Str($target))
+                ->withReplaceFirst($this->root->path()->absolute(), '')
+                ->toString();
             $reflectionFile = new ReflectionFile($target);
             try {
                 $reflection = new ReflectionFileInterface($reflectionFile);

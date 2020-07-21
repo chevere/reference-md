@@ -33,6 +33,8 @@ $targetDir = dirFromString($target);
 $rootDir = dirFromString($root);
 if (!$targetDir->exists()) {
     $targetDir->create();
+} else {
+    $targetDir->removeContents();
 }
 $readmeFilename = $targetDir->path()->getChild('README.md')->absolute();
 $readme = writerForFile(fileFromString($readmeFilename), 'w');
