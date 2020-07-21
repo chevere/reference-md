@@ -11,10 +11,13 @@
 
 declare(strict_types=1);
 
+use Chevere\Components\Filesystem\FilePhpReturn;
+use Chevere\Components\VarExportable\VarExportable;
 use Chevere\Components\Writer\StreamWriter;
 use Chevere\ReferenceMd\PHPIterator;
 use function Chevere\Components\Filesystem\dirFromString;
 use function Chevere\Components\Filesystem\fileFromString;
+use function Chevere\Components\Filesystem\filePhpFromString;
 use function Chevere\Components\Writer\streamFor;
 use function Chevere\Components\Writer\writerForFile;
 
@@ -36,6 +39,11 @@ if (!$targetDir->exists()) {
 } else {
     $targetDir->removeContents();
 }
+$sidebar = filePhpFromString(
+    $targetDir->path()->getChild('sidebar.php')->absolute()
+);
+$sidebar->file()->create();
+(new FilePhpReturn($sidebar))->put(new VarExportable('auto'));
 $readmeFilename = $targetDir->path()->getChild('README.md')->absolute();
 $readme = writerForFile(fileFromString($readmeFilename), 'w');
 $log = new StreamWriter(streamFor('php://stdout', 'w'));
