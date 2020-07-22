@@ -15,11 +15,10 @@ use Chevere\Components\Filesystem\FilePhpReturn;
 use Chevere\Components\VarExportable\VarExportable;
 use Chevere\Components\Writer\StreamWriter;
 use Chevere\ReferenceMd\PHPIterator;
-use function Chevere\Components\Filesystem\dirFromString;
-use function Chevere\Components\Filesystem\fileFromString;
-use function Chevere\Components\Filesystem\filePhpFromString;
+use function Chevere\Components\Filesystem\dirForString;
+use function Chevere\Components\Filesystem\fileForString;
+use function Chevere\Components\Filesystem\filePhpForString;
 use function Chevere\Components\Writer\streamFor;
-use function Chevere\Components\Writer\writerForFile;
 
 require 'vendor/autoload.php';
 
@@ -32,20 +31,20 @@ $remote = 'https://github.com/chevere/chevere/blob/master/';
 $source = '/home/rodolfo/git/chevere/chevere/';
 $root = '/home/rodolfo/git/chevere/chevere/';
 $target = '/home/rodolfo/git/chevere/docs/reference/';
-$targetDir = dirFromString($target);
-$rootDir = dirFromString($root);
+$targetDir = dirForString($target);
+$rootDir = dirForString($root);
 if (!$targetDir->exists()) {
     $targetDir->create();
 } else {
     $targetDir->removeContents();
 }
-$sidebar = filePhpFromString(
+$sidebar = filePhpForString(
     $targetDir->path()->getChild('sidebar.php')->absolute()
 );
 $sidebar->file()->create();
 (new FilePhpReturn($sidebar))->put(new VarExportable('auto'));
 $readmeFilename = $targetDir->path()->getChild('README.md')->absolute();
-$readme = writerForFile(fileFromString($readmeFilename), 'w');
+$readme = new StreamWriter(streamFor($readmeFilename, 'w'));
 $log = new StreamWriter(streamFor('php://stdout', 'w'));
 $log->write("📝 Writing reference readme @ $readmeFilename\n");
 $readme->write(

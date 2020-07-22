@@ -23,9 +23,8 @@ use RecursiveFilterIterator;
 use RecursiveIteratorIterator;
 use Throwable;
 use UnexpectedValueException;
-use function Chevere\Components\Filesystem\fileFromString;
+use function Chevere\Components\Filesystem\fileForString;
 use function Chevere\Components\Writer\streamFor;
-use function Chevere\Components\Writer\writerForFile;
 
 class PHPIterator
 {
@@ -100,7 +99,7 @@ class PHPIterator
                 continue;
             }
             $filePath = $writeDir->path()->absolute() . str_replace('\\', '/', $fileName);
-            $file = fileFromString($filePath);
+            $file = fileForString($filePath);
             if (!$file->exists()) {
                 $file->create();
             }
@@ -118,7 +117,7 @@ class PHPIterator
             );
             $log->write("- $filePath\n");
             $interfaceWriter = new InterfaceWriter($remoteUrl, $reflection);
-            $writer = writerForFile($file, 'w');
+            $writer = new StreamWriter(streamFor($filePath, 'w'));
             $interfaceWriter->write($writer);
             continue;
         }
