@@ -16,7 +16,6 @@ use Chevere\Components\VarExportable\VarExportable;
 use Chevere\Components\Writer\StreamWriter;
 use Chevere\ReferenceMd\PHPIterator;
 use function Chevere\Components\Filesystem\dirForString;
-use function Chevere\Components\Filesystem\fileForString;
 use function Chevere\Components\Filesystem\filePhpForString;
 use function Chevere\Components\Writer\streamFor;
 
