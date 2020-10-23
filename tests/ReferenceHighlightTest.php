@@ -32,7 +32,7 @@ final class ReferenceHighlightTest extends TestCase
         $fromReference = new Reference('Chevere\\Interfaces\\Message\\Ref1');
         $toReference = new Reference('Chevere\\Interfaces\\Message\\Ref2');
         $this->assertSame(
-            './' . $toReference->shortName(),
+            './' . $toReference->markdownName(),
             (new ReferenceHighlight($fromReference))->getLinkTo($toReference)
         );
     }
@@ -42,7 +42,7 @@ final class ReferenceHighlightTest extends TestCase
         $fromReference = new Reference('Chevere\\Interfaces\\Controller\\ControllerInterface');
         $toReference = new Reference('Chevere\\Interfaces\\Message\\MessageInterface');
         $this->assertSame(
-            '../Message/' . $toReference->shortName(),
+            '../Message/' . $toReference->markdownName(),
             (new ReferenceHighlight($fromReference))->getLinkTo($toReference)
         );
     }
@@ -52,7 +52,7 @@ final class ReferenceHighlightTest extends TestCase
         $fromReference = new Reference('Chevere\\Interfaces\\Controller\\ControllerInterface');
         $toReference = new Reference('Chevere\\Exceptions\\Message\\MessageException');
         $this->assertSame(
-            '../../Exceptions/Message/' . $toReference->shortName(),
+            '../../Exceptions/Message/' . $toReference->markdownName(),
             (new ReferenceHighlight($fromReference))->getLinkTo($toReference)
         );
     }
@@ -62,7 +62,7 @@ final class ReferenceHighlightTest extends TestCase
         $fromReference = new Reference('Chevere\\Interfaces\\Plugin\\Plugs\\HooksInterface');
         $toReference = new Reference('Chevere\\Exceptions\\Message\\MessageException');
         $this->assertSame(
-            '../../../Exceptions/Message/' . $toReference->shortName(),
+            '../../../Exceptions/Message/' . $toReference->markdownName(),
             (new ReferenceHighlight($fromReference))->getLinkTo($toReference)
         );
     }
