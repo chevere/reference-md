@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Chevere\ReferenceMd;
 
 use Chevere\Interfaces\Writer\WriterInterface;
-use Chevere\ReferenceMd\ReflectionFileInterface;
 use Go\ParserReflection\ReflectionMethod;
 use phpDocumentor\Reflection\DocBlockFactory;
 
@@ -22,20 +21,20 @@ final class InterfaceWriter
 {
     private string $sourceUrl;
 
-    private ReflectionFileInterface $reflectionFile;
+    private ReflectionInterface $reflectionInterface;
 
     private DocBlockFactory $docsFactory;
 
-    public function __construct(string $sourceUrl, ReflectionFileInterface $reflectionFile)
+    public function __construct(string $sourceUrl, ReflectionInterface $reflectionInterface)
     {
         $this->sourceUrl = $sourceUrl;
-        $this->reflectionFile = $reflectionFile;
+        $this->reflectionInterface = $reflectionInterface;
         $this->docsFactory = DocBlockFactory::createInstance();
     }
 
     public function write(WriterInterface $writer): void
     {
-        $interface = $this->reflectionFile->interface();
+        $interface = $this->reflectionInterface->interface();
         $writer->write(
             "---\n" .
             "editLink: false\n" .
@@ -67,12 +66,12 @@ final class InterfaceWriter
                 $referenceHighligh->getHighlightTo(new Reference($extends)) . "\n"
             );
         }
-        if ($this->reflectionFile->hasDocBlock()) {
+        if ($this->reflectionInterface->hasDocBlock()) {
             $writer->write(
                 "\n## Description\n" .
-                "\n" . $this->reflectionFile->docBlock()->getSummary() . "\n"
+                "\n" . $this->reflectionInterface->docBlock()->getSummary() . "\n"
             );
-            $docDesc = (string) $this->reflectionFile->docBlock()->getDescription();
+            $docDesc = (string) $this->reflectionInterface->docBlock()->getDescription();
             if ($docDesc !== '') {
                 $writer->write("\n$docDesc\n");
             }

@@ -15,7 +15,7 @@ namespace Chevere\ReferenceMd;
 
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
-use Roave\BetterReflection\Reflection\ReflectionClass;
+use ReflectionClass;
 
 final class ReflectionInterface
 {
@@ -29,7 +29,7 @@ final class ReflectionInterface
     {
         $interfaces = $reflectionClass->getInterfaces();
         $key = array_key_first($interfaces);
-        $this->interface = $key !== null ? ReflectionClass::createFromName($key) : $reflectionClass;
+        $this->interface = $key !== null ? new ReflectionClass($key) : $reflectionClass;
         $factory = DocBlockFactory::createInstance();
         $docComment = $this->interface->getDocComment();
         if ($docComment != '') {

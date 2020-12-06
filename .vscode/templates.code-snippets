@@ -1,0 +1,17 @@
+{
+    "immutable-method": {
+        "description": "Chevere immutable method",
+        "prefix": "immutable-method",
+        "body": [
+            "private ${2|int,string,bool,array,object,resource|} \\$${3:argument};",
+            "",
+            "public function with${1:Name}(${2|int,string,bool,array,object,resource|} \\$${3:argument}): ${4:self}",
+            "{",
+            "\t\\$new = clone \\$this;",
+            "\t\\$new->${3:argument} = \\$${3:argument};",
+            "",
+            "\treturn \\$new;",
+            "}"
+        ]
+    },
+}

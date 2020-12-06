@@ -1,0 +1,26 @@
+{
+    "test": {
+        "description": "Reference MD test",
+        "prefix": "test",
+        "body": [
+            "<?php",
+            "",
+            "use PHPUnit\\Framework\\TestCase;",
+            "",
+            "final class $TM_FILENAME_BASE extends TestCase",
+            "{",
+            "\t$0",
+            "}"
+        ]
+    },
+    "test-method": {
+        "description": "Reference MD test method",
+        "prefix": "test-method",
+        "body": [
+            "public function test${1:Name}(): void",
+            "{",
+            "\t$0",
+            "}"
+        ]
+    },
+}

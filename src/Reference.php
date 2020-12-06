@@ -20,8 +20,6 @@ final class Reference
 {
     private string $name;
 
-    // private ReferenceHighlight $highlight;
-
     private bool $isLinked;
 
     private string $shortName;

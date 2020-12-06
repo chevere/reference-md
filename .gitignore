@@ -1,4 +1,17 @@
-/vendor/
-/build
+# Composer
+/vendor
 /composer.lock
-/.phpunit.result.cache
+
+# Build
+/build
+
+# PHP-CS-Fixer
+/.php_cs
+/.php_cs.cache
+
+# PHPUnit
+/.phpunit.cache
+.phpunit.result.cache
+
+# IDE
+/.idea

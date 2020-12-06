@@ -15,8 +15,10 @@ use Chevere\Components\Filesystem\FilePhpReturn;
 use Chevere\Components\VarExportable\VarExportable;
 use Chevere\Components\Writer\StreamWriter;
 use Chevere\ReferenceMd\PHPIterator;
-use function Chevere\Components\Filesystem\dirForString;
-use function Chevere\Components\Filesystem\filePhpForString;
+
+use function Chevere\Components\Filesystem\dirForPath;
+use function Chevere\Components\Filesystem\filePhpForPath;
+use function Chevere\Components\Filesystem\filePhpReturnForPath;
 use function Chevere\Components\Writer\streamFor;
 
 require 'vendor/autoload.php';
@@ -28,18 +30,16 @@ set_exception_handler('Chevere\Components\ThrowableHandler\consoleHandler');
 
 $remote = 'https://github.com/chevere/chevere/blob/master/';
 $source = '/home/rodolfo/git/chevere/chevere/';
-$root = '/home/rodolfo/git/chevere/chevere/';
+$root = $source;
 $target = '/home/rodolfo/git/chevere/docs/reference/';
-$targetDir = dirForString($target);
-$rootDir = dirForString($root);
+$targetDir = dirForPath($target);
+$rootDir = dirForPath($root);
 if (!$targetDir->exists()) {
     $targetDir->create();
 } else {
     $targetDir->removeContents();
 }
-$sidebar = filePhpForString(
-    $targetDir->path()->getChild('sidebar.php')->absolute()
-);
+$sidebar = filePhpForPath($target . 'sidebar.php');
 $sidebar->file()->create();
 (new FilePhpReturn($sidebar))->put(new VarExportable('auto'));
 $readmeFilename = $targetDir->path()->getChild('README.md')->absolute();
@@ -55,8 +55,8 @@ $readme->write(
     "\nThis is the public reference for exceptions and interfaces.\n"
 );
 foreach ([
-    'exceptions/' => 'Exceptions',
-    'interfaces/' => 'Interfaces',
+    'src/Chevere/Exceptions/' => 'Exceptions',
+    'src/Chevere/Interfaces/' => 'Interfaces',
 ] as $path => $title) {
     $log->write("\n✨ Process started for $path ($title)\n");
     $sourceDir = $rootDir->getChild($path);

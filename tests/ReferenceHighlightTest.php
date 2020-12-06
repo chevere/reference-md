@@ -66,4 +66,21 @@ final class ReferenceHighlightTest extends TestCase
             (new ReferenceHighlight($fromReference))->getLinkTo($toReference)
         );
     }
+
+    public function testHighlightTo(): void {
+        $fromReference = new Reference('Chevere\\Interfaces\\Message\\MessageInterface');
+        $highlight = new ReferenceHighlight($fromReference);
+        $this->assertSame(
+            '[PDO](https://www.php.net/manual/class.pdo)',
+            $highlight->getHighlightTo(new Reference('PDO'))
+        );
+        $this->assertSame(
+            '[PDO](../../PDO.md)',
+            $highlight->getHighlightTo(new Reference('Chevere\\PDO'))
+        );
+        $this->assertSame(
+            'test',
+            $highlight->getHighlightTo(new Reference('test'))
+        );
+    }
 }

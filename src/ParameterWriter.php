@@ -31,8 +31,10 @@ final class ParameterWriter
             ? $this->reflection->getType()->getName()
             : '';
         $writer->write(
-            $referenceHighlight->getHighlightTo(new Reference((string) $type)) .
-            ' `$' . $this->reflection->getName() . '`'
+            $referenceHighlight->getHighlightTo(new Reference($type))
+            . ' `$'
+            . $this->reflection->getName()
+            . '`'
         );
     }
 }

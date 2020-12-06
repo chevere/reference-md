@@ -23,7 +23,8 @@ use RecursiveFilterIterator;
 use RecursiveIteratorIterator;
 use Throwable;
 use UnexpectedValueException;
-use function Chevere\Components\Filesystem\fileForString;
+
+use function Chevere\Components\Filesystem\fileForPath;
 use function Chevere\Components\Writer\streamFor;
 
 class PHPIterator
@@ -86,6 +87,7 @@ class PHPIterator
         asort($files);
         $letters = [];
         $currentLetter = '';
+        
         foreach ($files as $file) {
             $target = $file;
             $remoteUrl = $remote . (new Str($target))
@@ -93,13 +95,13 @@ class PHPIterator
                 ->toString();
             $reflectionFile = new ReflectionFile($target);
             try {
-                $reflection = new ReflectionFileInterface($reflectionFile);
+                $reflection = new ReflectionInterface($reflectionFile);
                 $fileName = $reflection->interface()->getName() . '.md';
             } catch (Throwable $e) {
                 continue;
             }
             $filePath = $writeDir->path()->absolute() . str_replace('\\', '/', $fileName);
-            $file = fileForString($filePath);
+            $file = fileForPath($filePath);
             if (!$file->exists()) {
                 $file->create();
             }

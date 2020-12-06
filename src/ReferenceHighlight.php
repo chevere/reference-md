@@ -19,6 +19,7 @@ use Chevere\ReferenceMd\Reference;
 
 final class ReferenceHighlight
 {
+    // TODO: How to update these?
     const PHP_CLASSES = [
         'AppendIterator',
         'ArgumentCountError',
@@ -66,6 +67,7 @@ final class ReferenceHighlight
         'OverflowException',
         'ParentIterator',
         'ParseError',
+        'PDO',
         'php_user_filter',
         'RangeException',
         'RecursiveArrayIterator',
