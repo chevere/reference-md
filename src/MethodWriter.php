@@ -14,38 +14,41 @@ declare(strict_types=1);
 namespace Chevere\ReferenceMd;
 
 use Chevere\Interfaces\Writer\WriterInterface;
-use Go\ParserReflection\ReflectionParameter;
+use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tags\Throws;
 use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Types\Context;
 use phpDocumentor\Reflection\Types\ContextFactory;
+use ReflectionParameter;
 use ReflectionMethod;
 
 final class MethodWriter
 {
     private ReflectionMethod $reflection;
+    
+    private DocBlockFactory $docBlockFactory;
 
-    private DocBlockFactory $factory;
+    private Context $context;
+
+    private bool $isConstruct;
+
+    private DocBlock $docBlock;
 
     public function __construct(ReflectionMethod $reflection, DocBlockFactory $factory)
     {
         $this->reflection = $reflection;
-        $this->factory = $factory;
-    }
-
-    public function write(Reference $reference, WriterInterface $writer): void
-    {
-        $contextFactory = new ContextFactory();
-        $context = $contextFactory->createFromReflector($this->reflection);
-        $referenceHighlight = new ReferenceHighlight($reference);
-        $isConstruct = $this->reflection->getName() === '__construct';
+        $this->docBlockFactory = $factory;
+        $this->context = (new ContextFactory)->createFromReflector($this->reflection);
+        $this->isConstruct = $this->reflection->getName() === '__construct';
         $docComment = $this->reflection->getDocComment();
         if ($docComment !== false) {
-            $docBlock = $this->factory->create((string) $docComment, $context);
-            $summary = $docBlock->getSummary();
-            if ($summary !== '') {
-                $writer->write("\n$summary\n");
-            }
+            $this->docBlock = $this->docBlockFactory->create((string) $docComment, $this->context);
         }
+    }
+
+    public function write(ReferenceHighlight $referenceHighlight, WriterInterface $writer): void
+    {
+        $this->handleWriteSummary($writer);
         /**
          * @var ReflectionParameter[] $parameters
          */
@@ -61,11 +64,25 @@ final class MethodWriter
             }
             $writer->write(PHP_EOL);
         }
-        if (isset($docBlock)) {
+        $this->handleWriteThrows($referenceHighlight, $writer);
+        $this->handleWriteReturn($referenceHighlight, $writer);
+        $this->handleWriteDescription($writer);
+        
+    }
+
+    private function handleWriteSummary(WriterInterface $writer): void {
+        if (isset($this->docBlock) && $this->docBlock->getSummary() !== '') {
+            $writer->write("\n". $this->docBlock->getSummary() . "\n");
+        }
+    }
+
+    private function handleWriteThrows(ReferenceHighlight $referenceHighlight, WriterInterface $writer): void
+    {
+        if (isset($this->docBlock)) {
             /**
              * @var Throws[] $throwTags
              */
-            $throwTags = $docBlock->getTagsByName('throws');
+            $throwTags = $this->docBlock->getTagsByName('throws');
             if ($throwTags !== []) {
                 $writer->write("\n::: danger THROWS\n");
                 foreach ($throwTags as $throw) {
@@ -76,35 +93,39 @@ final class MethodWriter
                             '- ⚠ Unknown type `' . $throwReference->shortName() . "` declared in `@throws` tag`\n"
                         );
                     } else {
+                        $description = $throw->getDescription();
+                        $description = $description !== null
+                            ? ' ' . ((string) $description) : '';
                         $writer->write(
-                            '- ' . $referenceHighlight->getHighlightTo($throwReference) . "\n"
+                            '- ' . $referenceHighlight->getHighlightTo($throwReference) . $description . "\n"
                         );
-                        if ($throw->getDescription() !== null && $throw->getDescription()->__toString() !== '') {
-                            $writer->write($throw->getDescription()->__toString() . "\n");
-                        }
                     }
                 }
                 $writer->write(":::\n");
             }
         }
-        if (!$isConstruct) {
-            $return = $this->reflection->hasReturnType()
-                ? $this->reflection->getReturnType()->getName()
-                : '';
-            if ($return === '') {
-                $return = 'void';
-            } else {
-                $return = $referenceHighlight
-                    ->getHighlightTo(new Reference($return));
-            }
-            $writer->write(
-                "\n::: tip RETURN\n" .
-                $return . "\n" .
-                ':::' . "\n"
-            );
+    }
+
+    private function handleWriteReturn(ReferenceHighlight $referenceHighlight, WriterInterface $writer): void
+    {
+        if ($this->isConstruct) {
+            return;
         }
-        if (isset($docBlock)) {
-            $description = (string) $docBlock->getDescription();
+        $return = $this->reflection->hasReturnType()
+            ? $this->reflection->getReturnType()->getName() : 'void';
+        $return = $referenceHighlight
+            ->getHighlightTo(new Reference($return));
+        $writer->write(
+            "\n::: tip RETURN\n" .
+            $return . "\n" .
+            ':::' . "\n"
+        );
+    }
+
+    private function handleWriteDescription(WriterInterface $writer): void
+    {
+        if (isset($this->docBlock)) {
+            $description = (string) $this->docBlock->getDescription();
             if ($description !== '') {
                 $writer->write("\n$description\n");
             }

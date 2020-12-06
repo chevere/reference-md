@@ -110,7 +110,9 @@ final class InterfaceWriter
                     $this->docsFactory
                 );
                 $methodWriter->write(
-                    new Reference($interface->getName()),
+                    new ReferenceHighlight(
+                        new Reference($interface->getName())
+                    ),
                     $writer
                 );
                 $writer->write(
