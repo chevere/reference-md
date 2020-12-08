@@ -53,62 +53,58 @@ final class InterfaceWriter
             "\n\n[view source]($this->sourceUrl)" .
             "\n"
         );
-        // $this->writeImplements();
+        if(!$this->reflectionClass->isInterface()) {
+            $this->writeImplements();
+        }
         $this->writeExtends();
         $this->writeDocBlock();
         $this->writeConstants();
         $this->writeMethods();
     }
 
-    // private function writeImplements(): void {
-    //     $implements = $this->reflectionClass->getInterfaceNames();
-    //     if ($implements !== []) {
-    //         $this->writer->write("\n## Implements\n\n");
-    //         foreach ($implements as $fqn) {
-    //             $this->writer->write(
-    //                 '- ' .
-    //                 $this->referenceHighligh->getHighlightTo(
-    //                     new Reference($fqn)
-    //                 ) .
-    //                 "\n"
-    //             );
-    //         }
-    //     }
-    // }
-
-    private function writeExtends(): void {
-        $interfaces = $this->reflectionClass->getInterfaceNames();
-        if ($interfaces !== []) {
-            $this->writer->write("\n## Extends\n\n");
+    private function writeImplements(): void {
+        
+        $implements = $this->reflectionClass->getInterfaceNames();
+        if ($implements !== []) {
+            $this->writer->write("\n## Implements\n\n");
             /**
-             * @var string $interface
+             * @var string $fqn
              */
-            foreach($interfaces as $interface) {
-                $this->writer->write(
-                    "- " .
-                    $this->referenceHighligh->getHighlightTo(
-                        new Reference($interface)
-                    ) . 
-                    "\n"
-                );
+            foreach ($implements as $fqn) {
+                $this->writeListItemReference($fqn);
             }
         }
     }
-    // private function writeExtends(): void {
-    //     if ($this->reflectionClass->getParentClass() !== false) {
-    //         $extends = $this->reflectionClass->getParentClass()->getName();
-    //     }
-    //     if (isset($extends)) {
-    //         $this->writer->write(
-    //             "\n## Extends" .
-    //             "\n\n- " .
-    //             $this->referenceHighligh->getHighlightTo(
-    //                 new Reference($extends)
-    //             ) .
-    //             "\n"
-    //         );
-    //     }
-    // }
+
+    private function writeExtends(): void {
+        if($this->reflectionClass->isInterface()) {
+            $extends = $this->reflectionClass->getInterfaceNames();
+        } else {
+            $parent = $this->reflectionClass->getParentClass();
+            if($parent !== false) {
+                $extends = [$parent];
+            }
+        }
+        if ($extends !== []) {
+            $this->writer->write("\n## Extends\n\n");
+            /**
+             * @var string $extend
+             */
+            foreach($extends as $extend) {
+                $this->writeListItemReference($extend);
+            }
+        }
+    }
+
+    private function writeListItemReference(string $name): void {
+        $this->writer->write(
+            "- " .
+            $this->referenceHighligh->getHighlightTo(
+                new Reference($name)
+            ) . 
+            "\n"
+        );
+    }
 
     private function writeDocBlock(): void {
         if (!$this->reflectionInterface->hasDocBlock()) {
