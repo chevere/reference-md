@@ -6,4 +6,4 @@ editLink: false
 
 `Tests\_resources\EmptyInterface`
 
-[view source](https://sourcelink/)
+[view source](./)

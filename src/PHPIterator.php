@@ -17,10 +17,10 @@ use Chevere\Components\Str\Str;
 use Chevere\Components\Writer\StreamWriter;
 use Chevere\Interfaces\Filesystem\DirInterface;
 use Chevere\Interfaces\Writer\WriterInterface;
-use Go\ParserReflection\ReflectionFile;
 use RecursiveDirectoryIterator;
 use RecursiveFilterIterator;
 use RecursiveIteratorIterator;
+use ReflectionClass;
 use Throwable;
 use UnexpectedValueException;
 
@@ -52,9 +52,9 @@ class PHPIterator
         try {
             $this->recursiveIterator->rewind();
         } catch (UnexpectedValueException $e) {
-            echo 'Unable to rewind iterator: '
-                . $e->getMessage() . "\n\n"
-                . '🤔 Maybe try with user privileges?';
+            echo 'Unable to rewind iterator: ' . $e->getMessage() .
+                "\n\n" .
+                '🤔 Try running with user privileges over the directories.';
         }
     }
 
@@ -73,11 +73,11 @@ class PHPIterator
         $readme = new StreamWriter(streamFor($readmePath, 'w'));
         $log->write('📝 Writing ' . $this->title . " readme @ $readmePath\n");
         $readme->write(
-            "---\n" .
-            "sidebar: false\n" .
-            "editLink: false\n" .
-            "---\n" .
-            "\n# " . $this->title
+            "---" .
+            "\nsidebar: false" .
+            "\neditLink: false" .
+            "\n---" .
+            "\n\n# " . $this->title
         );
         while ($this->recursiveIterator->valid()) {
             $key = $this->recursiveIterator->current()->getPathName();
@@ -89,18 +89,20 @@ class PHPIterator
         $currentLetter = '';
         
         foreach ($files as $file) {
-            $target = $file;
-            $remoteUrl = $remote . (new Str($target))
+            $remoteUrl = $remote . (new Str($file))
                 ->withReplaceFirst($this->root->path()->absolute(), '')
                 ->toString();
-            $reflectionFile = new ReflectionFile($target);
+            $namespace = $this->getNamespaceFromFile($file);
+            $className = $this->getClassNameFromFile($file);
             try {
-                $reflection = new ReflectionInterface($reflectionFile);
-                $fileName = $reflection->reflectionClass()->getName() . '.md';
+                $reflection = new ReflectionInterface(
+                    new ReflectionClass("$namespace\\$className")
+                );
+                $fileName = str_replace('\\', '/', $reflection->reflectionClass()->getName()) . '.md';
             } catch (Throwable $e) {
-                continue;
+                xdd($file, "$namespace\\$className");
             }
-            $filePath = $writeDir->path()->absolute() . str_replace('\\', '/', $fileName);
+            $filePath = $writeDir->path()->absolute() . $fileName;
             $file = fileForPath($filePath);
             if (!$file->exists()) {
                 $file->create();
@@ -115,7 +117,7 @@ class PHPIterator
                 $letters[] = $currentLetter;
             }
             $readme->write(
-                "\n  - [$shortName](./" . $reference->markdownPath() . ')'
+                "\n- [$shortName](./" . $reference->markdownPath() . ')'
             );
             $log->write("- $filePath\n");
             $writer = new StreamWriter(streamFor($filePath, 'w'));
@@ -123,6 +125,48 @@ class PHPIterator
             $interfaceWriter->write();
             continue;
         }
+    }
+
+    private function getNamespaceFromFile(string $file): string
+    {
+        $src = file_get_contents($file);
+        $tokens = token_get_all($src);
+        $count = count($tokens);
+        for($i = 0, $namespace_ok = false, $namespace = ''; $i < $count; ++$i) {
+            $token = $tokens[$i];
+            if (is_array($token) && $token[0] === T_NAMESPACE) {
+                while (++$i < $count) {
+                    if ($tokens[$i] === ';') {
+                        $namespace_ok = true;
+                        $namespace = trim($namespace);
+                        return $namespace_ok ? $namespace : '';
+                    }
+                    $namespace .= is_array($tokens[$i]) ? $tokens[$i][1] : $tokens[$i];
+                }
+            }
+        }
+    }
+
+    private function getClassNameFromFile($file): string
+    {
+        $php_code = file_get_contents($file);
+        $classes = [];
+        $tokens = token_get_all($php_code);
+        $count = count($tokens);
+        for ($i = 0; $i < $count; $i++) {
+            if(!isset($tokens[$i - 2], $tokens[$i - 1], $tokens[$i])) {
+                continue;
+            }
+            if (
+                in_array($tokens[$i - 2][0], [T_INTERFACE, T_CLASS, T_TRAIT])
+                && $tokens[$i - 1][0] == T_WHITESPACE
+                && $tokens[$i][0] == T_STRING
+            ) {
+                $classes[] = $tokens[$i][1];
+            }
+        }
+
+        return $classes[0];
     }
 
     private function getRecursiveDirectoryIterator(string $path): RecursiveDirectoryIterator

@@ -6,7 +6,7 @@ editLink: false
 
 `Tests\_resources\ExtendsInterface`
 
-[view source](https://sourcelink/)
+[view source](./)
 
 ## Extends
 

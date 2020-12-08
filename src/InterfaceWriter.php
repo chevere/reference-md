@@ -81,9 +81,7 @@ final class InterfaceWriter
             $extends = $this->reflectionClass->getInterfaceNames();
         } else {
             $parent = $this->reflectionClass->getParentClass();
-            if($parent !== false) {
-                $extends = [$parent];
-            }
+            $extends = $parent !== false ? [$parent->getName()] : [];
         }
         if ($extends !== []) {
             $this->writer->write("\n## Extends\n\n");

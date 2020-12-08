@@ -6,7 +6,7 @@ editLink: false
 
 `Tests\_resources\DefinedInterface`
 
-[view source](https://sourcelink/)
+[view source](./)
 
 ## Description
 

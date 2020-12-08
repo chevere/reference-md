@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Chevere\ReferenceMd;
 
-use InvalidArgumentException;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionClass;
@@ -28,12 +27,6 @@ final class ReflectionInterface
 
     public function __construct(ReflectionClass $reflectionClass)
     {
-        if(!$reflectionClass->isInterface()) {
-            throw new InvalidArgumentException('Argument must be a reflection class for an interface');
-        }
-        // $interfaces = $reflectionClass->getInterfaces();
-        // $key = array_key_first($interfaces);
-        // $this->reflectionClass = $key !== null ? new ReflectionClass($key) : $reflectionClass;
         $this->reflectionClass = $reflectionClass;
         $factory = DocBlockFactory::createInstance();
         $docComment = $this->reflectionClass->getDocComment();

@@ -15,21 +15,18 @@ use Chevere\Components\Filesystem\FilePhpReturn;
 use Chevere\Components\VarExportable\VarExportable;
 use Chevere\Components\Writer\StreamWriter;
 use Chevere\ReferenceMd\PHPIterator;
-
 use function Chevere\Components\Filesystem\dirForPath;
 use function Chevere\Components\Filesystem\filePhpForPath;
-use function Chevere\Components\Filesystem\filePhpReturnForPath;
 use function Chevere\Components\Writer\streamFor;
 
 require 'vendor/autoload.php';
 
 $hrTime = (int) hrtime(true);
-
 set_error_handler('Chevere\Components\ThrowableHandler\errorsAsExceptions');
 set_exception_handler('Chevere\Components\ThrowableHandler\consoleHandler');
-
 $remote = 'https://github.com/chevere/chevere/blob/master/';
 $source = '/home/rodolfo/git/chevere/chevere/';
+require $source . 'vendor/autoload.php';
 $root = $source;
 $target = '/home/rodolfo/git/chevere/docs/reference/';
 $targetDir = dirForPath($target);

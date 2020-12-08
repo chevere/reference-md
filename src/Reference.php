@@ -31,8 +31,7 @@ final class Reference
     public function __construct(string $name)
     {
         $this->name = $name;
-        $this->isLinked = (new StrBool($name))
-            ->startsWith('Chevere\\');
+        $this->isLinked = (new StrBool($name))->startsWith('Chevere\\');
         $this->setShortName();
         if ($this->isLinked) {
             $this->base = (new Str($this->name))->withReplaceLast($this->shortName, '')->toString();
