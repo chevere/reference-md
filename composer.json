@@ -1,12 +1,14 @@
 {
-    "name": "chevere/phpdoc-md",
+    "name": "chevere/reference-md",
     "description": "Generates markdown docs for Chevere flavours",
     "type": "library",
     "license": "MIT",
-    "authors": [{
-        "name": "Rodolfo Berrios",
-        "email": "rodolfo@chevere.org"
-    }],
+    "authors": [
+        {
+            "name": "Rodolfo Berrios",
+            "email": "rodolfo@chevere.org"
+        }
+    ],
     "require": {
         "chevere/chevere": "dev-master",
         "phpdocumentor/reflection-docblock": "^5.1"
@@ -16,7 +18,12 @@
             "Chevere\\ReferenceMd\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "require-dev": {
-        "phpunit/phpunit": "^9.2"
+        "phpunit/phpunit": "^9.5"
     }
 }

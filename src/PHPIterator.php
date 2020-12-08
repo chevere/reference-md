@@ -96,7 +96,7 @@ class PHPIterator
             $reflectionFile = new ReflectionFile($target);
             try {
                 $reflection = new ReflectionInterface($reflectionFile);
-                $fileName = $reflection->interface()->getName() . '.md';
+                $fileName = $reflection->reflectionClass()->getName() . '.md';
             } catch (Throwable $e) {
                 continue;
             }
@@ -105,9 +105,9 @@ class PHPIterator
             if (!$file->exists()) {
                 $file->create();
             }
-            $reference = new Reference($reflection->interface()->getName());
+            $reference = new Reference($reflection->reflectionClass()->getName());
             $explode = explode('/', $reference->path());
-            $shortName = $reflection->interface()->getShortName();
+            $shortName = $reflection->reflectionClass()->getShortName();
             $letter = $explode[2];
             if ($currentLetter !== $letter) {
                 $readme->write("\n\n## $letter\n");
@@ -118,9 +118,9 @@ class PHPIterator
                 "\n  - [$shortName](./" . $reference->markdownPath() . ')'
             );
             $log->write("- $filePath\n");
-            $interfaceWriter = new InterfaceWriter($remoteUrl, $reflection);
             $writer = new StreamWriter(streamFor($filePath, 'w'));
-            $interfaceWriter->write($writer);
+            $interfaceWriter = new InterfaceWriter($remoteUrl, $reflection, $writer);
+            $interfaceWriter->write();
             continue;
         }
     }

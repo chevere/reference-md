@@ -16,108 +16,11 @@ namespace Chevere\ReferenceMd;
 use Chevere\Components\Str\Str;
 use Chevere\Components\Str\StrBool;
 use Chevere\ReferenceMd\Reference;
+use ReflectionClass;
+use Throwable;
 
 final class ReferenceHighlight
 {
-    // TODO: How to update these?
-    const PHP_CLASSES = [
-        'AppendIterator',
-        'ArgumentCountError',
-        'ArithmeticError',
-        'ArrayIterator',
-        'ArrayObject',
-        'AssertionError',
-        'BadFunctionCallException',
-        'BadMethodCallException',
-        'CachingIterator',
-        'CallbackFilterIterator',
-        'Closure',
-        'CompileError',
-        'Countable',
-        'DateInterval',
-        'DatePeriod',
-        'DateTime',
-        'DateTimeImmutable',
-        'DateTimeZone',
-        'Directory',
-        'DirectoryIterator',
-        'DivisionByZeroError',
-        'DomainException',
-        'EmptyIterator',
-        'Error',
-        'ErrorException',
-        'Exception',
-        'FilesystemIterator',
-        'FilterIterator',
-        'Generator',
-        'GlobIterator',
-        'HashContext',
-        'InfiniteIterator',
-        'InvalidArgumentException',
-        'IteratorIterator',
-        'LengthException',
-        'LibXMLError',
-        'LimitIterator',
-        'LogicException',
-        'MultipleIterator',
-        'NoRewindIterator',
-        'OuterIterator',
-        'OutOfBoundsException',
-        'OutOfRangeException',
-        'OverflowException',
-        'ParentIterator',
-        'ParseError',
-        'PDO',
-        'php_user_filter',
-        'RangeException',
-        'RecursiveArrayIterator',
-        'RecursiveCachingIterator',
-        'RecursiveCallbackFilterIterator',
-        'RecursiveDirectoryIterator',
-        'RecursiveFilterIterator',
-        'RecursiveIterator',
-        'RecursiveIteratorIterator',
-        'RecursiveRegexIterator',
-        'RecursiveTreeIterator',
-        'Reflection',
-        'ReflectionClass',
-        'ReflectionClassConstant',
-        'ReflectionException',
-        'ReflectionExtension',
-        'ReflectionFunction',
-        'ReflectionFunctionAbstract',
-        'ReflectionGenerator',
-        'ReflectionMethod',
-        'ReflectionNamedType',
-        'ReflectionObject',
-        'ReflectionParameter',
-        'ReflectionProperty',
-        'ReflectionReference',
-        'ReflectionType',
-        'ReflectionZendExtension',
-        'RegexIterator',
-        'RuntimeException',
-        'SeekableIterator',
-        'SessionHandler',
-        'SplDoublyLinkedList',
-        'SplFileInfo',
-        'SplFileObject',
-        'SplFixedArray',
-        'SplHeap',
-        'SplMaxHeap',
-        'SplMinHeap',
-        'SplObjectStorage',
-        'SplPriorityQueue',
-        'SplQueue',
-        'SplStack',
-        'SplTempFileObject',
-        'Throwable',
-        'TypeError',
-        'UnderflowException',
-        'UnexpectedValueException',
-        'WeakReference',
-    ];
-
     const PHP_URL_MANUAL = 'https://www.php.net/manual/';
 
     private Reference $reference;
@@ -171,9 +74,12 @@ final class ReferenceHighlight
     {
         $link = $this->getLinkTo($targetReference);
         if ($targetReference->isLinked() === false) {
-            if (in_array($targetReference->name(), self::PHP_CLASSES)) {
-                $link = $this->getPHPManualPage($targetReference->name());
-            }
+            try {
+                $reflection = new ReflectionClass($targetReference->name());
+                if(!$reflection->isUserDefined()) {
+                    $link = $this->getPHPManualPage($targetReference->name());
+                }
+            } catch(Throwable $e) {}
         }
         $linkBool = new StrBool($link);
         if ($linkBool->startsWith('.') || $linkBool->startsWith('http')) {
