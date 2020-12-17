@@ -39,7 +39,7 @@ if (!$targetDir->exists()) {
 $sidebar = filePhpForPath($target . 'sidebar.php');
 $sidebar->file()->create();
 (new FilePhpReturn($sidebar))->put(new VarExportable('auto'));
-$readmeFilename = $targetDir->path()->getChild('README.md')->absolute();
+$readmeFilename = $targetDir->path()->getChild('README.md')->toString();
 $readme = new StreamWriter(streamFor($readmeFilename, 'w'));
 $log = new StreamWriter(streamFor('php://stdout', 'w'));
 $log->write("📝 Writing reference readme @ $readmeFilename\n");

@@ -46,7 +46,7 @@ class PHPIterator
         $this->title = $title;
         $this->readme = $this->titleToPage($title);
         $this->root = $root;
-        $this->dirIterator = $this->getRecursiveDirectoryIterator($source->path()->absolute());
+        $this->dirIterator = $this->getRecursiveDirectoryIterator($source->path()->toString());
         $this->filterIterator = $this->getRecursiveFilterIterator($this->dirIterator);
         $this->recursiveIterator = new RecursiveIteratorIterator($this->filterIterator);
         try {
@@ -69,7 +69,7 @@ class PHPIterator
             $writeDir->create();
         }
         $files = [];
-        $readmePath = $writeDir->path()->absolute() . $this->readme;
+        $readmePath = $writeDir->path()->toString() . $this->readme;
         $readme = new StreamWriter(streamFor($readmePath, 'w'));
         $log->write('📝 Writing ' . $this->title . " readme @ $readmePath\n");
         $readme->write(
@@ -90,7 +90,7 @@ class PHPIterator
         
         foreach ($files as $file) {
             $remoteUrl = $remote . (new Str($file))
-                ->withReplaceFirst($this->root->path()->absolute(), '')
+                ->withReplaceFirst($this->root->path()->toString(), '')
                 ->toString();
             $namespace = $this->getNamespaceFromFile($file);
             $className = $this->getClassNameFromFile($file);
@@ -102,7 +102,7 @@ class PHPIterator
             } catch (Throwable $e) {
                 xdd($file, "$namespace\\$className");
             }
-            $filePath = $writeDir->path()->absolute() . $fileName;
+            $filePath = $writeDir->path()->toString() . $fileName;
             $file = fileForPath($filePath);
             if (!$file->exists()) {
                 $file->create();
