@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of Chevere.
+ * This file is part of Cheveress.
  *
  * (c) Rodolfo Berrios <rodolfo@chevere.org>
  *
@@ -12,7 +12,7 @@
 declare(strict_types=1);
 
 use Chevere\Components\Filesystem\FilePhpReturn;
-use Chevere\Components\VarExportable\VarExportable;
+use Chevere\Components\VarStorable\VarStorable;
 use Chevere\Components\Writer\StreamWriter;
 use Chevere\ReferenceMd\PHPIterator;
 use function Chevere\Components\Filesystem\dirForPath;
@@ -38,7 +38,7 @@ if (!$targetDir->exists()) {
 }
 $sidebar = filePhpForPath($target . 'sidebar.php');
 $sidebar->file()->create();
-(new FilePhpReturn($sidebar))->put(new VarExportable('auto'));
+(new FilePhpReturn($sidebar))->put(new VarStorable('auto'));
 $readmeFilename = $targetDir->path()->getChild('README.md')->toString();
 $readme = new StreamWriter(streamFor($readmeFilename, 'w'));
 $log = new StreamWriter(streamFor('php://stdout', 'w'));
