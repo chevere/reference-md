@@ -36,8 +36,9 @@ final class ParameterWriter
     {
         $writer->write(
             $referenceHighlight->getHighlightTo($this->reference)
-            . ' `$'
-            . $this->reflection->getName()
+            . ' `'
+            . ($this->reflection->isVariadic() ? '...' : '')
+            . '$' . $this->reflection->getName()
             . '`'
         );
     }

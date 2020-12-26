@@ -25,4 +25,20 @@ final class ParameterWriterTest extends TestCase
         );
         $this->assertSame('string `$string`', $writer->toString());
     }
+
+    public function testWriteSpread(): void
+    {
+        $anon = function(string ...$string) {};
+        $reflection = new ReflectionParameter($anon, 'string');
+        $parameterWriter = new ParameterWriter($reflection);
+        $stream = streamForString('');
+        $writer = new StreamWriter($stream);
+        $parameterWriter->write(
+            new ReferenceHighlight(
+                new Reference('test')
+            ),
+            $writer
+        );
+        $this->assertSame('string `...$string`', $writer->toString());
+    }
 }
