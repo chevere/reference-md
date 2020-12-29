@@ -24,7 +24,7 @@ require 'vendor/autoload.php';
 $hrTime = (int) hrtime(true);
 set_error_handler('Chevere\Components\ThrowableHandler\errorsAsExceptions');
 set_exception_handler('Chevere\Components\ThrowableHandler\consoleHandler');
-$urlBase = 'https://github.com/chevere/chevere/blob/master/';
+$urlBase = 'https://github.com/chevere/chevere/blob/master/src/Chevere/';
 $source = '/home/rodolfo/git/chevere/chevere/';
 require $source . 'vendor/autoload.php';
 $root = $source;
@@ -59,7 +59,7 @@ foreach ([
     $log->write("\n✨ Process started for ${path} (${title})\n");
     $sourceDir = $rootDir->getChild($path);
     $iterator = (new PHPIterator($title, $sourceDir, $outputDir, $log))
-        ->withUrlBase($urlBase);
+        ->withUrlBase("${urlBase}${title}/");
     $iterator->write();
     $readme->write("\n- [${title}](./" . $iterator->readmeFilename() . ')');
 }
