@@ -13,10 +13,14 @@ declare(strict_types=1);
 
 namespace Chevere\ReferenceMd;
 
+use function Chevere\Components\Filesystem\fileForPath;
 use Chevere\Components\Str\Str;
+use function Chevere\Components\Writer\streamFor;
 use Chevere\Components\Writer\StreamWriter;
 use Chevere\Interfaces\Filesystem\DirInterface;
 use Chevere\Interfaces\Writer\WriterInterface;
+use Ds\Set;
+use Generator;
 use RecursiveDirectoryIterator;
 use RecursiveFilterIterator;
 use RecursiveIteratorIterator;
@@ -24,16 +28,19 @@ use ReflectionClass;
 use Throwable;
 use UnexpectedValueException;
 
-use function Chevere\Components\Filesystem\fileForPath;
-use function Chevere\Components\Writer\streamFor;
-
 class PHPIterator
 {
     private string $title;
 
-    private string $readme;
+    private DirInterface $sourceDir;
 
-    private DirInterface $root;
+    private DirInterface $outputDir;
+
+    private WriterInterface $logWriter;
+
+    private WriterInterface $readme;
+
+    private string $readmeFilename;
 
     private RecursiveDirectoryIterator $dirIterator;
 
@@ -41,90 +48,126 @@ class PHPIterator
 
     private RecursiveIteratorIterator $recursiveIterator;
 
-    public function __construct(string $title, DirInterface $source, DirInterface $root)
-    {
+    private Set $letters;
+
+    private string $currentLetter = '';
+
+    private string $urlBase = '';
+
+    public function __construct(
+        string $title,
+        DirInterface $sourceDir,
+        DirInterface $outputDir,
+        WriterInterface $logWriter
+    ) {
         $this->title = $title;
-        $this->readme = $this->titleToPage($title);
-        $this->root = $root;
-        $this->dirIterator = $this->getRecursiveDirectoryIterator($source->path()->toString());
+        $this->sourceDir = $sourceDir;
+        $this->outputDir = $outputDir;
+        $this->logWriter = $logWriter;
+        $this->readmeFilename = $this->titleToDocument($title);
+        $this->dirIterator = $this->getRecursiveDirectoryIterator($this->sourceDir->path()->toString());
         $this->filterIterator = $this->getRecursiveFilterIterator($this->dirIterator);
         $this->recursiveIterator = new RecursiveIteratorIterator($this->filterIterator);
+        $this->letters = new Set();
+
         try {
             $this->recursiveIterator->rewind();
         } catch (UnexpectedValueException $e) {
-            echo 'Unable to rewind iterator: ' . $e->getMessage() .
+            $this->logWriter->write(
+                'Unable to rewind iterator: ' . $e->getMessage() .
                 "\n\n" .
-                '🤔 Try running with user privileges over the directories.';
+                '🤔 Try running with user privileges.'
+            );
         }
     }
 
-    public function readme(): string
+    public function withUrlBase(string $urlBase): self
     {
-        return $this->readme;
+        $new = clone $this;
+        $new->urlBase = $urlBase;
+
+        return $new;
     }
 
-    public function write(string $remote, DirInterface $writeDir, WriterInterface $log): void
+    public function readmeFilename(): string
     {
-        if (!$writeDir->exists()) {
-            $writeDir->create();
-        }
+        return $this->readmeFilename;
+    }
+
+    public function getFiles(): Generator
+    {
         $files = [];
-        $readmePath = $writeDir->path()->toString() . $this->readme;
-        $readme = new StreamWriter(streamFor($readmePath, 'w'));
-        $log->write('📝 Writing ' . $this->title . " readme @ $readmePath\n");
-        $readme->write(
-            "---" .
-            "\nsidebar: false" .
-            "\neditLink: false" .
-            "\n---" .
-            "\n\n# " . $this->title
-        );
         while ($this->recursiveIterator->valid()) {
             $key = $this->recursiveIterator->current()->getPathName();
             $files[] = $key;
             $this->recursiveIterator->next();
         }
         asort($files);
-        $letters = [];
-        $currentLetter = '';
-        
+
         foreach ($files as $file) {
-            $remoteUrl = $remote . (new Str($file))
-                ->withReplaceFirst($this->root->path()->toString(), '')
-                ->toString();
-            $namespace = $this->getNamespaceFromFile($file);
-            $className = $this->getClassNameFromFile($file);
-            try {
-                $reflection = new ReflectionInterface(
-                    new ReflectionClass("$namespace\\$className")
-                );
-                $fileName = str_replace('\\', '/', $reflection->reflectionClass()->getName()) . '.md';
-            } catch (Throwable $e) {
-                xdd($file, "$namespace\\$className");
-            }
-            $filePath = $writeDir->path()->toString() . $fileName;
-            $file = fileForPath($filePath);
-            if (!$file->exists()) {
-                $file->create();
-            }
-            $reference = new Reference($reflection->reflectionClass()->getName());
-            $explode = explode('/', $reference->path());
-            $shortName = $reflection->reflectionClass()->getShortName();
-            $letter = $explode[2];
-            if ($currentLetter !== $letter) {
-                $readme->write("\n\n## $letter\n");
-                $currentLetter = $letter;
-                $letters[] = $currentLetter;
-            }
-            $readme->write(
-                "\n- [$shortName](./" . $reference->markdownPath() . ')'
-            );
-            $log->write("- $filePath\n");
-            $writer = new StreamWriter(streamFor($filePath, 'w'));
-            $interfaceWriter = new InterfaceWriter($remoteUrl, $reflection, $writer);
-            $interfaceWriter->write();
-            continue;
+            yield $file;
         }
+    }
+
+    public function write(): void
+    {
+        if (! $this->outputDir->exists()) {
+            $this->outputDir->create();
+        }
+        $readmePath = $this->outputDir->path()->toString() . $this->readmeFilename;
+        $this->readme = new StreamWriter(streamFor($readmePath, 'w'));
+        $this->logWriter->write('📝 Writing ' . $this->title . " readme @ ${readmePath}\n");
+        $this->readme->write(
+            '---' .
+            "\nsidebar: false" .
+            "\neditLink: false" .
+            "\n---" .
+            "\n\n# " . $this->title
+        );
+        foreach ($this->getFiles() as $file) {
+            $this->writeFile($file);
+        }
+    }
+
+    public function writeFile(string $file): void
+    {
+        $remoteLink = $this->urlBase . (new Str($file))
+            ->withReplaceFirst($this->sourceDir->path()->toString(), '')
+            ->toString();
+        $namespace = $this->getNamespaceFromFile($file);
+        $className = $this->getClassNameFromFile($file);
+        if ($className === '') {
+            return;
+        }
+
+        try {
+            $reflection = new ReflectionInterface(
+                new ReflectionClass("${namespace}\\${className}")
+            );
+            $fileName = str_replace('\\', '/', $reflection->reflectionClass()->getName()) . '.md';
+        } catch (Throwable $e) {
+        }
+        $filePath = $this->outputDir->path()->toString() . $fileName;
+        $file = fileForPath($filePath);
+        if (! $file->exists()) {
+            $file->create();
+        }
+        $reference = new Reference($reflection->reflectionClass()->getName());
+        $explode = explode('/', $reference->path());
+        $shortName = $reflection->reflectionClass()->getShortName();
+        $letter = $explode[2];
+        if ($this->currentLetter !== $letter) {
+            $this->readme->write("\n\n## ${letter}\n");
+            $this->currentLetter = $letter;
+            $this->letters->add($this->currentLetter);
+        }
+        $this->readme->write(
+            "\n- [${shortName}](./" . $reference->markdownPath() . ')'
+        );
+        $this->logWriter->write("- ${filePath}\n");
+        $writer = new StreamWriter(streamFor($filePath, 'w'));
+        $interfaceWriter = new InterfaceWriter($remoteLink, $reflection, $writer);
+        $interfaceWriter->write();
     }
 
     private function getNamespaceFromFile(string $file): string
@@ -132,13 +175,14 @@ class PHPIterator
         $src = file_get_contents($file);
         $tokens = token_get_all($src);
         $count = count($tokens);
-        for($i = 0, $namespace_ok = false, $namespace = ''; $i < $count; ++$i) {
+        for ($i = 0, $namespace_ok = false, $namespace = ''; $i < $count; ++$i) {
             $token = $tokens[$i];
             if (is_array($token) && $token[0] === T_NAMESPACE) {
                 while (++$i < $count) {
                     if ($tokens[$i] === ';') {
                         $namespace_ok = true;
                         $namespace = trim($namespace);
+
                         return $namespace_ok ? $namespace : '';
                     }
                     $namespace .= is_array($tokens[$i]) ? $tokens[$i][1] : $tokens[$i];
@@ -154,19 +198,19 @@ class PHPIterator
         $tokens = token_get_all($php_code);
         $count = count($tokens);
         for ($i = 0; $i < $count; $i++) {
-            if(!isset($tokens[$i - 2], $tokens[$i - 1], $tokens[$i])) {
+            if (! isset($tokens[$i - 2], $tokens[$i - 1], $tokens[$i])) {
                 continue;
             }
             if (
-                in_array($tokens[$i - 2][0], [T_INTERFACE, T_CLASS, T_TRAIT])
-                && $tokens[$i - 1][0] == T_WHITESPACE
-                && $tokens[$i][0] == T_STRING
+                in_array($tokens[$i - 2][0], [T_INTERFACE, T_CLASS, T_TRAIT], true)
+                && $tokens[$i - 1][0] === T_WHITESPACE
+                && $tokens[$i][0] === T_STRING
             ) {
                 $classes[] = $tokens[$i][1];
             }
         }
 
-        return $classes[0];
+        return $classes[0] ?? '';
     }
 
     private function getRecursiveDirectoryIterator(string $path): RecursiveDirectoryIterator
@@ -180,8 +224,7 @@ class PHPIterator
 
     private function getRecursiveFilterIterator(RecursiveDirectoryIterator $dirIterator): RecursiveFilterIterator
     {
-        return new class($dirIterator) extends RecursiveFilterIterator
-        {
+        return new class($dirIterator) extends RecursiveFilterIterator {
             public function accept(): bool
             {
                 if ($this->hasChildren()) {
@@ -193,7 +236,7 @@ class PHPIterator
         };
     }
 
-    private function titleToPage(string $title): string
+    private function titleToDocument(string $title): string
     {
         return strtr(strtolower($title), [
             ' ' => '-',

@@ -1,5 +1,17 @@
 <?php
 
+/*
+ * This file is part of Chevere.
+ *
+ * (c) Rodolfo Berrios <rodolfo@chevere.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
+use function Chevere\Components\Writer\streamForString;
 use Chevere\Components\Writer\StreamWriter;
 use Chevere\Interfaces\Writer\WriterInterface;
 use Chevere\ReferenceMd\InterfaceWriter;
@@ -10,18 +22,8 @@ use Tests\_resources\EmptyInterface;
 use Tests\_resources\ExtendsInterface;
 use Tests\_resources\ImplementsClass;
 
-use function Chevere\Components\Writer\streamForString;
-
 final class InterfaceWriterTest extends TestCase
 {
-    private function getInterfaceWriter(string $className, WriterInterface $writer): InterfaceWriter {
-        return new InterfaceWriter(
-            './',
-            new ReflectionInterface(
-                new ReflectionClass($className)
-            ),
-            $writer);
-    }
     public function testEmptyInterface(): void
     {
         $writer = new StreamWriter(streamForString(''));
@@ -76,5 +78,15 @@ final class InterfaceWriterTest extends TestCase
             __DIR__ . '/_resources/ImplementsClass.md',
             $writer->toString()
         );
+    }
+
+    private function getInterfaceWriter(string $className, WriterInterface $writer): InterfaceWriter
+    {
+        return new InterfaceWriter(
+            './',
+            new ReflectionInterface(
+                new ReflectionClass($className)
+            ),
+            $writer);
     }
 }

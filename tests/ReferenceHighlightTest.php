@@ -67,7 +67,8 @@ final class ReferenceHighlightTest extends TestCase
         );
     }
 
-    public function testHighlightTo(): void {
+    public function testHighlightTo(): void
+    {
         $fromReference = new Reference('Chevere\\Interfaces\\Message\\MessageInterface');
         $highlight = new ReferenceHighlight($fromReference);
         $this->assertSame(
