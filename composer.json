@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "chevere/chevere": "dev-master",
+        "chevere/chevere": "dev-main",
         "phpdocumentor/reflection-docblock": "^5.1"
     },
     "autoload": {
