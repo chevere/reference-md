@@ -34,7 +34,7 @@ final class ParameterWriterTest extends TestCase
             ),
             $writer
         );
-        $this->assertSame('string: string', $writer->toString());
+        $this->assertSame('*string*: string', $writer->toString());
     }
 
     public function testWriteSpread(): void
@@ -51,6 +51,6 @@ final class ParameterWriterTest extends TestCase
             ),
             $writer
         );
-        $this->assertSame('...string: string', $writer->toString());
+        $this->assertSame('*...string*: string', $writer->toString());
     }
 }

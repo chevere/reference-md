@@ -128,7 +128,7 @@ final class MethodWriterTest extends TestCase
         );
         $this->assertSame(
             "\n**Parameters:**\n" .
-            "\n- parameter: object" .
+            "\n- *parameter*: object" .
             "\n\n::: tip RETURN" .
             "\nvoid" .
             "\n:::\n",

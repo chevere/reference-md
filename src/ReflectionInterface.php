@@ -30,7 +30,7 @@ final class ReflectionInterface
         $this->reflectionClass = $reflectionClass;
         $factory = DocBlockFactory::createInstance();
         $docComment = $this->reflectionClass->getDocComment();
-        if ($docComment != '') {
+        if ($docComment !== '' && $docComment !== false) {
             $this->docBlock = $factory->create($docComment);
             $this->hasDocBlock = true;
         }

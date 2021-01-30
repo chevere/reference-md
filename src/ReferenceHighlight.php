@@ -15,13 +15,12 @@ namespace Chevere\ReferenceMd;
 
 use Chevere\Components\Str\Str;
 use Chevere\Components\Str\StrBool;
-use Chevere\ReferenceMd\Reference;
 use ReflectionClass;
 use Throwable;
 
 final class ReferenceHighlight
 {
-    const PHP_URL_MANUAL = 'https://www.php.net/manual/';
+    public const PHP_URL_MANUAL = 'https://www.php.net/manual/';
 
     private Reference $reference;
 
@@ -52,7 +51,7 @@ final class ReferenceHighlight
         $toStrBol = new StrBool($targetReference->path());
         foreach ($pops as $chop) {
             $try = implode('/', $pops) . '/';
-            if (!$toStrBol->startsWith($try)) {
+            if (! $toStrBol->startsWith($try)) {
                 array_pop($pops);
                 $levels++;
             } else {
@@ -63,6 +62,7 @@ final class ReferenceHighlight
                         $targetReference->markdownName()
                     )
                     ->toString();
+
                 break;
             }
         }
@@ -76,10 +76,11 @@ final class ReferenceHighlight
         if ($targetReference->isLinked() === false) {
             try {
                 $reflection = new ReflectionClass($targetReference->name());
-                if(!$reflection->isUserDefined()) {
+                if (! $reflection->isUserDefined()) {
                     $link = $this->getPHPManualPage($targetReference->name());
                 }
-            } catch(Throwable $e) {}
+            } catch (Throwable $e) {
+            }
         }
         $linkBool = new StrBool($link);
         if ($linkBool->startsWith('.') || $linkBool->startsWith('http')) {

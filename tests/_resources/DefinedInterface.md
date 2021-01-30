@@ -32,8 +32,8 @@ Construct summary.
 
 **Parameters:**
 
-- argument: string
-- countable: [Countable](https://www.php.net/manual/class.countable)
+- *argument*: string
+- *countable*: [Countable](https://www.php.net/manual/class.countable)
 
 Construct description.
 

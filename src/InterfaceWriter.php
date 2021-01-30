@@ -45,15 +45,15 @@ final class InterfaceWriter
     public function write(): void
     {
         $this->writer->write(
-            "---" .
+            '---' .
             "\neditLink: false" .
             "\n---" .
             "\n\n# " . $this->reflectionClass->getShortName() .
-            "\n\n`" . $this->reflectionClass->getName() . "`" .
-            "\n\n[view source]($this->sourceUrl)" .
+            "\n\n`" . $this->reflectionClass->getName() . '`' .
+            "\n\n[view source]({$this->sourceUrl})" .
             "\n"
         );
-        if(!$this->reflectionClass->isInterface()) {
+        if (! $this->reflectionClass->isInterface()) {
             $this->writeImplements();
         }
         $this->writeExtends();
@@ -62,8 +62,8 @@ final class InterfaceWriter
         $this->writeMethods();
     }
 
-    private function writeImplements(): void {
-        
+    private function writeImplements(): void
+    {
         $implements = $this->reflectionClass->getInterfaceNames();
         if ($implements !== []) {
             $this->writer->write("\n## Implements\n\n");
@@ -76,8 +76,9 @@ final class InterfaceWriter
         }
     }
 
-    private function writeExtends(): void {
-        if($this->reflectionClass->isInterface()) {
+    private function writeExtends(): void
+    {
+        if ($this->reflectionClass->isInterface()) {
             $extends = $this->reflectionClass->getInterfaceNames();
         } else {
             $parent = $this->reflectionClass->getParentClass();
@@ -88,24 +89,26 @@ final class InterfaceWriter
             /**
              * @var string $extend
              */
-            foreach($extends as $extend) {
+            foreach ($extends as $extend) {
                 $this->writeListItemReference($extend);
             }
         }
     }
 
-    private function writeListItemReference(string $name): void {
+    private function writeListItemReference(string $name): void
+    {
         $this->writer->write(
-            "- " .
+            '- ' .
             $this->referenceHighligh->getHighlightTo(
                 new Reference($name)
-            ) . 
+            ) .
             "\n"
         );
     }
 
-    private function writeDocBlock(): void {
-        if (!$this->reflectionInterface->hasDocBlock()) {
+    private function writeDocBlock(): void
+    {
+        if (! $this->reflectionInterface->hasDocBlock()) {
             return;
         }
         $this->writer->write(
@@ -115,18 +118,19 @@ final class InterfaceWriter
         );
         $docDesc = (string) $this->reflectionInterface->docBlock()->getDescription();
         if ($docDesc !== '') {
-            $this->writer->write("\n$docDesc\n");
+            $this->writer->write("\n${docDesc}\n");
         }
     }
 
-    private function writeConstants(): void {
+    private function writeConstants(): void
+    {
         $constants = $this->reflectionClass->getConstants();
         if ($constants !== []) {
             $this->writer->write("\n## Constants\n");
             foreach ($constants as $const => $value) {
                 $this->writer->write(
-                    "\n### $const\n" .
-                    "\nType `" . gettype($value) . "`" .
+                    "\n### ${const}\n" .
+                    "\nType `" . gettype($value) . '`' .
                     "\n\n```php" .
                     "\n" . var_export($value, true) .
                     "\n```\n"
@@ -135,7 +139,8 @@ final class InterfaceWriter
         }
     }
 
-    private function writeMethods(): void {
+    private function writeMethods(): void
+    {
         $methods = $this->reflectionClass->getMethods();
         /**
          * @var ReflectionMethod[]
@@ -143,10 +148,10 @@ final class InterfaceWriter
         if ($methods !== []) {
             $wroteHeader = false;
             foreach ($methods as $method) {
-                if (!$method->isUserDefined()) {
+                if (! $method->isUserDefined() || ! $method->isPublic()) {
                     continue;
                 }
-                if(!$wroteHeader) {
+                if (! $wroteHeader) {
                     $this->writer->write("\n## Methods\n");
                     $wroteHeader = true;
                 }
