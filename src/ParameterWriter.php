@@ -35,11 +35,11 @@ final class ParameterWriter
     public function write(ReferenceHighlight $referenceHighlight, WriterInterface $writer): void
     {
         $writer->write(
-            $referenceHighlight->getHighlightTo($this->reference)
-            . ' `'
+            ''
             . ($this->reflection->isVariadic() ? '...' : '')
-            . '$' . $this->reflection->getName()
-            . '`'
+            . $this->reflection->getName()
+            . ': '
+            . $referenceHighlight->getHighlightTo($this->reference)
         );
     }
 }

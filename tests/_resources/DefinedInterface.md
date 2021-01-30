@@ -30,10 +30,10 @@ Type `string`
 
 Construct summary.
 
-#### Parameters
+**Parameters:**
 
-1. string `$argument`
-2. [Countable](https://www.php.net/manual/class.countable) `$countable`
+- argument: string
+- countable: [Countable](https://www.php.net/manual/class.countable)
 
 Construct description.
 

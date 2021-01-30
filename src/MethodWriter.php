@@ -19,13 +19,13 @@ use phpDocumentor\Reflection\DocBlock\Tags\Throws;
 use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Types\Context;
 use phpDocumentor\Reflection\Types\ContextFactory;
-use ReflectionParameter;
 use ReflectionMethod;
+use ReflectionParameter;
 
 final class MethodWriter
 {
     private ReflectionMethod $reflection;
-    
+
     private DocBlockFactory $docBlockFactory;
 
     private Context $context;
@@ -38,7 +38,7 @@ final class MethodWriter
     {
         $this->reflection = $reflection;
         $this->docBlockFactory = $factory;
-        $this->context = (new ContextFactory)->createFromReflector($this->reflection);
+        $this->context = (new ContextFactory())->createFromReflector($this->reflection);
         $this->isConstruct = $this->reflection->getName() === '__construct';
         $docComment = $this->reflection->getDocComment();
         if ($docComment !== false) {
@@ -49,46 +49,43 @@ final class MethodWriter
     public function write(ReferenceHighlight $referenceHighlight, WriterInterface $writer): void
     {
         $this->handleWriteSummary($writer);
-        /**
-         * @var ReflectionParameter[] $parameters
-         */
+        /** @var ReflectionParameter[] $parameters */
+
         $parameters = $this->reflection->getParameters();
         if ($this->reflection->getNumberOfParameters() > 0) {
-            $writer->write("\n#### Parameters\n");
-            $index = 0;
+            $writer->write("\n**Parameters:**\n");
+            $index = 1;
             foreach ($parameters as $parameter) {
-                $index++;
-                $writer->write("\n$index. ");
+                $writer->write("\n- ");
                 $parameterWriter = new ParameterWriter($parameter);
                 $parameterWriter->write($referenceHighlight, $writer);
+                $index++;
             }
             $writer->write(PHP_EOL);
         }
         $this->handleWriteThrows($referenceHighlight, $writer);
         $this->handleWriteReturn($referenceHighlight, $writer);
         $this->handleWriteDescription($writer);
-        
     }
 
-    private function handleWriteSummary(WriterInterface $writer): void {
+    private function handleWriteSummary(WriterInterface $writer): void
+    {
         if (isset($this->docBlock) && $this->docBlock->getSummary() !== '') {
-            $writer->write("\n". $this->docBlock->getSummary() . "\n");
+            $writer->write("\n" . $this->docBlock->getSummary() . "\n");
         }
     }
 
     private function handleWriteThrows(ReferenceHighlight $referenceHighlight, WriterInterface $writer): void
     {
         if (isset($this->docBlock)) {
-            /**
-             * @var Throws[] $throwTags
-             */
+            /** @var Throws[] $throwTags */
             $throwTags = $this->docBlock->getTagsByName('throws');
             if ($throwTags !== []) {
                 $writer->write("\n::: danger THROWS\n");
                 foreach ($throwTags as $throw) {
                     $throwType = ltrim($throw->getType()->__toString(), '\\');
                     $throwReference = new Reference($throwType);
-                    if (!class_exists($throwType)) {
+                    if (! class_exists($throwType)) {
                         $writer->write(
                             '- ⚠ Unknown type `' . $throwReference->shortName() . "` declared in `@throws` tag`\n"
                         );
@@ -127,7 +124,7 @@ final class MethodWriter
         if (isset($this->docBlock)) {
             $description = (string) $this->docBlock->getDescription();
             if ($description !== '') {
-                $writer->write("\n$description\n");
+                $writer->write("\n${description}\n");
             }
         }
     }

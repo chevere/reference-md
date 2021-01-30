@@ -127,8 +127,8 @@ final class MethodWriterTest extends TestCase
             new ReflectionMethod($class, 'method')
         );
         $this->assertSame(
-            "\n#### Parameters\n" .
-            "\n1. object `\$parameter`" .
+            "\n**Parameters:**\n" .
+            "\n- parameter: object" .
             "\n\n::: tip RETURN" .
             "\nvoid" .
             "\n:::\n",
