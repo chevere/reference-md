@@ -29,7 +29,7 @@ final class ReferenceTest extends TestCase
         $this->assertSame('', $reference->base());
     }
 
-    public function testInternalReference(): void
+    public function testChevereReference(): void
     {
         $ns = 'Chevere\\';
         $shortName = 'Something';

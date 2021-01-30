@@ -80,8 +80,8 @@ final class ReferenceHighlightTest extends TestCase
             $highlight->getHighlightTo(new Reference('Chevere\\PDO'))
         );
         $this->assertSame(
-            'test',
-            $highlight->getHighlightTo(new Reference('test'))
+            '[Ds\Set](https://www.php.net/manual/class.ds\set)',
+            $highlight->getHighlightTo(new Reference('Ds\Set'))
         );
     }
 }
