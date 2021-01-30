@@ -40,17 +40,7 @@ $sidebar = filePhpForPath($target . 'sidebar.php');
 $sidebar->file()->create();
 (new FilePhpReturn($sidebar))->put(new VarStorable('auto'));
 $readmeFilename = $outputDir->path()->getChild('README.md')->toString();
-$readme = new StreamWriter(streamFor($readmeFilename, 'w'));
 $log = new StreamWriter(streamFor('php://stdout', 'w'));
-$log->write("📝 Writing reference readme @ ${readmeFilename}\n");
-$readme->write(
-    "---\n" .
-    "sidebar: false\n" .
-    "editLink: false\n" .
-    "---\n" .
-    "\n# Reference\n" .
-    "\nThis is the public reference for exceptions and interfaces.\n"
-);
 foreach ([
     'src/Chevere/Components/' => 'Components',
     'src/Chevere/Exceptions/' => 'Exceptions',
@@ -61,7 +51,6 @@ foreach ([
     $iterator = (new PHPIterator($title, $sourceDir, $outputDir, $log))
         ->withUrlBase("${urlBase}${title}/");
     $iterator->write();
-    $readme->write("\n- [${title}](./" . $iterator->readmeFilename() . ')');
 }
 $timeTook = number_format(((int) hrtime(true) - $hrTime) / 1e+6, 0) . ' ms';
 $log->write("\n🎉 Done in ${timeTook}!\n");
