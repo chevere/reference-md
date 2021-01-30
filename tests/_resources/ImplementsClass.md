@@ -14,9 +14,9 @@ editLink: false
 
 ## Methods
 
-### count()
+### count
 
-::: tip RETURN
+::: tip Return
 int
 :::
 

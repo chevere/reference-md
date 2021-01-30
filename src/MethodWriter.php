@@ -53,15 +53,16 @@ final class MethodWriter
 
         $parameters = $this->reflection->getParameters();
         if ($this->reflection->getNumberOfParameters() > 0) {
-            $writer->write("\n**Parameters:**\n");
+            $writer->write("\n::: warning Parameters\n");
             $index = 1;
             foreach ($parameters as $parameter) {
-                $writer->write("\n- ");
+                $writer->write('- ');
                 $parameterWriter = new ParameterWriter($parameter);
                 $parameterWriter->write($referenceHighlight, $writer);
                 $index++;
+                $writer->write("\n");
             }
-            $writer->write(PHP_EOL);
+            $writer->write(":::\n");
         }
         $this->handleWriteThrows($referenceHighlight, $writer);
         $this->handleWriteReturn($referenceHighlight, $writer);
@@ -81,7 +82,7 @@ final class MethodWriter
             /** @var Throws[] $throwTags */
             $throwTags = $this->docBlock->getTagsByName('throws');
             if ($throwTags !== []) {
-                $writer->write("\n::: danger THROWS\n");
+                $writer->write("\n::: danger Throws\n");
                 foreach ($throwTags as $throw) {
                     $throwType = ltrim($throw->getType()->__toString(), '\\');
                     $throwReference = new Reference($throwType);
@@ -113,7 +114,7 @@ final class MethodWriter
         $return = $referenceHighlight
             ->getHighlightTo(new Reference($return));
         $writer->write(
-            "\n::: tip RETURN\n" .
+            "\n::: tip Return\n" .
             $return . "\n" .
             ':::' . "\n"
         );

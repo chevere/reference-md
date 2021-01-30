@@ -65,7 +65,7 @@ final class MethodWriterTest extends TestCase
         );
         $this->assertSame(
             "\nSummary for this method.\n" .
-            "\n::: tip RETURN" .
+            "\n::: tip Return" .
             "\nvoid" .
             "\n:::\n",
             $writer->toString()
@@ -89,7 +89,7 @@ final class MethodWriterTest extends TestCase
         );
         $this->assertSame(
             "\nSummary for this method.\n" .
-            "\n::: tip RETURN" .
+            "\n::: tip Return" .
             "\nvoid" .
             "\n:::\n" .
             "\nDescription for what it does.\n",
@@ -109,7 +109,7 @@ final class MethodWriterTest extends TestCase
             new ReflectionMethod($class, 'method')
         );
         $this->assertSame(
-            "\n::: tip RETURN" .
+            "\n::: tip Return" .
             "\nbool" .
             "\n:::\n",
             $writer->toString()
@@ -127,9 +127,10 @@ final class MethodWriterTest extends TestCase
             new ReflectionMethod($class, 'method')
         );
         $this->assertSame(
-            "\n**Parameters:**\n" .
+            "\n::: warning Parameters" .
             "\n- *parameter*: object" .
-            "\n\n::: tip RETURN" .
+            "\n:::" .
+            "\n\n::: tip Return" .
             "\nvoid" .
             "\n:::\n",
             $writer->toString()
@@ -151,11 +152,11 @@ final class MethodWriterTest extends TestCase
             new ReflectionMethod($class, 'method')
         );
         $this->assertSame(
-            "\n::: danger THROWS" .
+            "\n::: danger Throws" .
             "\n- [Exception](https://www.php.net/manual/class.exception) On some error." .
             "\n- ⚠ Unknown type `NotFoundException` declared in `@throws` tag`" .
             "\n:::" .
-            "\n\n::: tip RETURN" .
+            "\n\n::: tip Return" .
             "\nvoid" .
             "\n:::\n",
             $writer->toString()

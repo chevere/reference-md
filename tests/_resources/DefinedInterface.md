@@ -26,24 +26,24 @@ Type `string`
 
 ## Methods
 
-### __construct()
+### __construct
 
 Construct summary.
 
-**Parameters:**
-
+::: warning Parameters
 - *argument*: string
 - *countable*: [Countable](https://www.php.net/manual/class.countable)
+:::
 
 Construct description.
 
 ---
 
-### test()
+### test
 
 Test summary.
 
-::: tip RETURN
+::: tip Return
 int
 :::
 

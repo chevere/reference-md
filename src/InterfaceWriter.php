@@ -155,7 +155,7 @@ final class InterfaceWriter
                     $this->writer->write("\n## Methods\n");
                     $wroteHeader = true;
                 }
-                $this->writer->write("\n### " . $method->getName() . "()\n");
+                $this->writer->write("\n### " . $method->getName() . "\n");
                 $methodWriter = new MethodWriter(
                     $method,
                     $this->docsFactory
