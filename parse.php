@@ -24,7 +24,7 @@ require 'vendor/autoload.php';
 $hrTime = (int) hrtime(true);
 set_error_handler('Chevere\Components\ThrowableHandler\errorsAsExceptions');
 set_exception_handler('Chevere\Components\ThrowableHandler\consoleHandler');
-$urlBase = 'https://github.com/chevere/chevere/blob/master/src/Chevere/';
+$urlBase = 'https://github.com/chevere/chevere/blob/main/src/Chevere/';
 $source = '/home/rodolfo/git/chevere/chevere/';
 require $source . 'vendor/autoload.php';
 $root = $source;
