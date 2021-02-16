@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-use function Chevere\Components\Writer\streamForString;
+use function Chevere\Components\Writer\streamTemp;
 use Chevere\Components\Writer\StreamWriter;
 use Chevere\Interfaces\Writer\WriterInterface;
 use Chevere\ReferenceMd\InterfaceWriter;
@@ -26,7 +26,7 @@ final class InterfaceWriterTest extends TestCase
 {
     public function testEmptyInterface(): void
     {
-        $writer = new StreamWriter(streamForString(''));
+        $writer = $this->getWriter();
         $interfaceWriter = $this->getInterfaceWriter(
             EmptyInterface::class,
             $writer
@@ -40,7 +40,7 @@ final class InterfaceWriterTest extends TestCase
 
     public function testExtendsInterface(): void
     {
-        $writer = new StreamWriter(streamForString(''));
+        $writer = $this->getWriter();
         $interfaceWriter = $this->getInterfaceWriter(
             ExtendsInterface::class,
             $writer
@@ -54,7 +54,7 @@ final class InterfaceWriterTest extends TestCase
 
     public function testDefinedInterface(): void
     {
-        $writer = new StreamWriter(streamForString(''));
+        $writer = $this->getWriter();
         $interfaceWriter = $this->getInterfaceWriter(
             DefinedInterface::class,
             $writer
@@ -68,7 +68,7 @@ final class InterfaceWriterTest extends TestCase
 
     public function testImplementsClass(): void
     {
-        $writer = new StreamWriter(streamForString(''));
+        $writer = $this->getWriter();
         $interfaceWriter = $this->getInterfaceWriter(
             ImplementsClass::class,
             $writer
@@ -78,6 +78,11 @@ final class InterfaceWriterTest extends TestCase
             __DIR__ . '/_resources/ImplementsClass.md',
             $writer->toString()
         );
+    }
+
+    public function getWriter(): WriterInterface
+    {
+        return new StreamWriter(streamTemp(''));
     }
 
     private function getInterfaceWriter(string $className, WriterInterface $writer): InterfaceWriter

@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-use function Chevere\Components\Writer\streamForString;
+use function Chevere\Components\Writer\streamTemp;
 use Chevere\Components\Writer\StreamWriter;
 use Chevere\Interfaces\Writer\WriterInterface;
 use Chevere\ReferenceMd\MethodWriter;
@@ -25,8 +25,7 @@ final class MethodWriterTest extends TestCase
     public function getWriterForReflection(ReflectionMethod $reflection): WriterInterface
     {
         $methodWriter = new MethodWriter($reflection, DocBlockFactory::createInstance());
-        $stream = streamForString('');
-        $writer = new StreamWriter($stream);
+        $writer = new StreamWriter(streamTemp(''));
         $methodWriter->write(
             new ReferenceHighlight(
                 new Reference('test')

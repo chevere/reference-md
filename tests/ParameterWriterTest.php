@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-use function Chevere\Components\Writer\streamForString;
+use function Chevere\Components\Writer\streamTemp;
 use Chevere\Components\Writer\StreamWriter;
 use Chevere\ReferenceMd\ParameterWriter;
 use Chevere\ReferenceMd\Reference;
@@ -26,8 +26,7 @@ final class ParameterWriterTest extends TestCase
         };
         $reflection = new ReflectionParameter($anon, 'string');
         $parameterWriter = new ParameterWriter($reflection);
-        $stream = streamForString('');
-        $writer = new StreamWriter($stream);
+        $writer = new StreamWriter(streamTemp(''));
         $parameterWriter->write(
             new ReferenceHighlight(
                 new Reference('test')
@@ -43,8 +42,7 @@ final class ParameterWriterTest extends TestCase
         };
         $reflection = new ReflectionParameter($anon, 'string');
         $parameterWriter = new ParameterWriter($reflection);
-        $stream = streamForString('');
-        $writer = new StreamWriter($stream);
+        $writer = new StreamWriter(streamTemp(''));
         $parameterWriter->write(
             new ReferenceHighlight(
                 new Reference('test')
