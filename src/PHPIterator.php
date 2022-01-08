@@ -65,7 +65,7 @@ class PHPIterator
         $this->outputDir = $outputDir;
         $this->logWriter = $logWriter;
         $this->readmeFilename = $this->titleToDocument($title);
-        $this->dirIterator = $this->getRecursiveDirectoryIterator($this->sourceDir->path()->toString());
+        $this->dirIterator = $this->getRecursiveDirectoryIterator($this->sourceDir);
         $this->filterIterator = $this->getRecursiveFilterIterator($this->dirIterator);
         $this->recursiveIterator = new RecursiveIteratorIterator($this->filterIterator);
         $this->letters = new Set();
@@ -116,7 +116,7 @@ class PHPIterator
         }
         $readmePath = $this->outputDir->path()->toString() . $this->readmeFilename;
         $this->readme = new StreamWriter(streamFor($readmePath, 'w'));
-        $this->logWriter->write('📝 Writing ' . $this->title . " readme @ ${readmePath}\n");
+        $this->logWriter->write('📝 Writing ' . $this->title . " readme at ${readmePath}\n");
         $this->readme->write(
             '---' .
             "\nsidebar: false" .
@@ -164,7 +164,7 @@ class PHPIterator
         $this->readme->write(
             "\n- [${shortName}](./" . $reference->markdownPath() . ')'
         );
-        $this->logWriter->write("- ${filePath}\n");
+        $this->logWriter->write("* ${filePath}\n");
         $writer = new StreamWriter(streamFor($filePath, 'w'));
         $interfaceWriter = new InterfaceWriter($remoteLink, $reflection, $writer);
         $interfaceWriter->write();
@@ -213,10 +213,10 @@ class PHPIterator
         return $classes[0] ?? '';
     }
 
-    private function getRecursiveDirectoryIterator(string $path): RecursiveDirectoryIterator
+    private function getRecursiveDirectoryIterator(DirInterface $dir): RecursiveDirectoryIterator
     {
         return new RecursiveDirectoryIterator(
-            $path,
+            $dir->path()->toString(),
             RecursiveDirectoryIterator::SKIP_DOTS
             | RecursiveDirectoryIterator::KEY_AS_PATHNAME
         );
