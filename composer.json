@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "chevere/chevere": "dev-main",
+        "chevere/chevere": "^0.1",
         "phpdocumentor/reflection-docblock": "^5.1"
     },
     "autoload": {
@@ -25,15 +25,6 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
-        "symplify/easy-coding-standard": "^9.0"
-    },
-    "repositories": {
-        "dev-package": {
-            "type": "path",
-            "url": "/home/rodolfo/git/chevere/chevere",
-            "options": {
-                "symlink": true
-            }
-        }
+        "symplify/easy-coding-standard": "^9.4"
     }
 }
