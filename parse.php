@@ -43,14 +43,7 @@ require $sourceAutoLoader->path()->toString();
 $outputDir = dirForPath(realpath($options['o']));
 if (! $outputDir->exists()) {
     $outputDir->create();
-} else {
-    $outputDir->removeContents();
 }
-// $sidebar = filePhpForPath($outputDir->path()->getChild('sidebar.php')->toString());
-// $sidebar->file()->create();
-// (new FilePhpReturn($sidebar))
-//     ->put(new VarStorable('auto'));
-
 $dirIteratorSource = new DirectoryIterator($sourceDirToScan->path()->toString());
 foreach($dirIteratorSource as $fileinfo) {
     if (!$fileinfo->isDir() || $fileinfo->isDot()) {
